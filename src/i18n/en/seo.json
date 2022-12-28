@@ -1,0 +1,49 @@
+{
+  "default": {
+    "title": "HOROBRI – Main",
+    "description": "HOROBRI - Ukrainian clothing brand, combined utilitarian, concise and comfortable design. The dynamic rhythm of life and the desire for freedom of creative people inspired us to create original oversize clothing.",
+    "keywords": "HOROBRI, horobri, Ukraine, clothes",
+    "h1": "HOROBRI – Main"
+  },
+  "dictionary": {
+    "page": "page"
+  },
+  "app": {
+    "categories": {
+      "title": "Categories {directions}{page}",
+      "h1": "Categories {directions}",
+      "description": "Category list"
+    },
+    "category": {
+      "title": "Category: {title}",
+      "h1": "{title}",
+      "description": "{description}"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Authorization",
+      "description": "Авторизація користувачем на майданчику",
+      "h1": "Authorization",
+      "keywords": "авторизация, пользователь ,площадка"
+    },
+    "recoverPassword": {
+      "title": "Recovery password",
+      "h1": "Recovery password",
+      "description": "Відновлення пароля на платформі через підтвердження на пошті",
+      "keywords": "Восстановление, пароль, пользователь, площадка"
+    },
+    "signUp": {
+      "title": "Реєстрація",
+      "description": "Реєстрація користувача на майданчику",
+      "h1": "Реєстрація",
+      "keywords": "Регистрация, пользователь, площадка"
+    }
+  },
+  "user": {
+    "main": {
+      "title": "Особистий кабінет",
+      "h1": "Особистий кабінет"
+    }
+  }
+}

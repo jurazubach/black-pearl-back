@@ -1,0 +1,11 @@
+{
+  "confirmEmail": {
+    "subject": "Ваш аккаунт створено"
+  },
+  "changePassword": {
+    "subject": "Запит на зміну пароля"
+  },
+  "successChangePassword": {
+    "subject": "Пароль успішно змінено"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "confirmEmail": {
+    "subject": "User created"
+  },
+  "changePassword": {
+    "subject": "Change password request"
+  },
+  "successChangePassword": {
+    "subject": "Password change succeeded"
+  }
+}

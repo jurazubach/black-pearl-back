@@ -1,0 +1,8 @@
+dist
+node_modules
+src/historyData/*
+src/tmp/images/*
+.idea
+.env
+horobri-mysql/*
+
