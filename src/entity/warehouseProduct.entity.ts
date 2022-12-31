@@ -17,12 +17,6 @@ export class WarehouseProductEntity {
   @Column({ type: "int", nullable: false })
   oldPrice: number;
 
-  @Column({ type: "varchar", nullable: false })
-  size: string;
-
-  @Column({ type: "varchar", nullable: false })
-  color: string;
-
   @Column({ type: "datetime", nullable: false, default: () => "CURRENT_TIMESTAMP" })
   lastUpdatedAt: string;
 

@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import {CategoryEntity} from "./category.entity";
 
 @Entity({ name: "products" })
 export class ProductEntity {
@@ -33,4 +34,5 @@ export class ProductEntity {
   descriptionEn: string;
 
   images: string[];
+  category: CategoryEntity;
 }

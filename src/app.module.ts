@@ -14,7 +14,10 @@ import { AppService } from "./app.service";
 import { AuthModule } from "./modules/auth/auth.module";
 import { UserModule } from "./modules/user/user.module";
 import { SeoModule } from "./modules/seo/seo.module";
+import { ProductModule } from './modules/product/product.module';
+import { WarehouseModule } from './modules/warehouse/warehouse.module';
 import { CategoryModule } from "./modules/category/category.module";
+import { CollectionModule } from "./modules/collection/collection.module";
 import { getMysqlConfig } from "src/configs/mysql.config";
 import { getIntlConfig } from "src/configs/intl.config";
 import { getStaticConfig } from "src/configs/static.config";
@@ -38,8 +41,11 @@ import { getStaticConfig } from "src/configs/static.config";
       inject: [ConfigService],
     }),
     UserModule,
-    CategoryModule,
     AuthModule,
+    CategoryModule,
+    ProductModule,
+    WarehouseModule,
+    CollectionModule,
     SeoModule,
   ],
   controllers: [AppController],
