@@ -6,7 +6,10 @@ import { WarehouseProductEntity } from '../../entity/warehouseProduct.entity';
 import { PropertyEntity } from '../../entity/property.entity';
 import { PropertyValueEntity } from '../../entity/propertyValue.entity';
 import { WarehouseProductPropertyEntity } from '../../entity/warehouseProductProperty.entity';
-import { IProductProperty } from '../product/product.service';
+import { formatProductProperties, IProductProperty } from '../product/product.helper';
+import { I18nService } from 'nestjs-i18n';
+import _capitalize from 'lodash/capitalize';
+import _round from 'lodash/round';
 
 @Injectable()
 export class WarehouseService {
@@ -17,6 +20,7 @@ export class WarehouseService {
     private readonly warehouseProductRepository: Repository<WarehouseProductEntity>,
     @InjectRepository(WarehouseProductPropertyEntity)
     private readonly warehouseProductPropertyRepository: Repository<WarehouseProductPropertyEntity>,
+    private readonly i18n: I18nService,
   ) {
   }
 
@@ -34,12 +38,18 @@ export class WarehouseService {
     return product;
   }
 
-  async getSimilarProducts(productId: number) {
+  async getSimilarProducts(productId: number, lang: string) {
     const similarProducts: any[] = [];
 
     const warehouseProducts = await this.warehouseProductRepository
       .createQueryBuilder('wp')
-      .select(`wp.id, wp.amount, wp.price, wp.oldPrice`)
+      .select(`wp.id, wp.quantity, wp.price, wp.oldPrice, JSON_OBJECT(
+        'id', p.id,
+        'alias', p.alias,
+        'singleTitle', p.singleTitle${_capitalize(lang)},
+        'multipleTitle', p.multipleTitle${_capitalize(lang)}
+      ) as product`)
+      .innerJoin(ProductEntity, 'p', 'p.id = wp.productId')
       .where('wp.productId = :productId', { productId })
       .getRawMany<WarehouseProductEntity>();
 
@@ -51,20 +61,87 @@ export class WarehouseService {
         .innerJoin(PropertyValueEntity, 'propertyValue', 'propertyValue.id = wpp.propertyValueId AND propertyValue.propertyId = property.id')
         .where('wpp.warehouseProductId = :warehouseProductId', { warehouseProductId: id })
         .getRawMany<IProductProperty>()
-        .then((res) => ({ warehouseProductId: id, properties: res }));
+        .then(async (productProperties) => {
+          const properties = await formatProductProperties(lang, this.i18n, productProperties);
+          return { warehouseProductId: id, properties };
+        });
     }));
 
-    warehouseProducts.forEach(({ id, amount, price, oldPrice }) => {
+    warehouseProducts.forEach(({ id, product, quantity, price, oldPrice }) => {
       const similarProductProperties = warehouseProductProperties.find((i) => i.warehouseProductId === id);
       if (similarProductProperties) {
-        const similarProperties = similarProductProperties.properties.map((i) => {
-          return { property: { alias: i.propertyAlias }, value: { alias: i.propertyValueAlias } };
-        });
-
-        similarProducts.push({ id, amount, price, oldPrice, similarProperties });
+        similarProducts.push({ id, product, quantity, price, oldPrice, similarProperties: similarProductProperties.properties });
       }
     });
 
     return similarProducts;
+  }
+
+  async calculateAvailableProductQuantity(
+    productId: number,
+    properties: Pick<IProductProperty, 'propertyId' | 'propertyValueId'>[],
+  ): Promise<number> {
+    const propertyIds: number[] = properties.map(({ propertyId }) => propertyId);
+    const propertyValueIds: number[] = properties.map(({ propertyValueId }) => propertyValueId);
+
+    const warehouseProduct = await this.warehouseProductRepository
+      .createQueryBuilder('wp')
+      .select(`wp.id, wp.quantity`)
+      .innerJoin(ProductEntity, 'p', 'p.id = wp.productId')
+      .innerJoin(
+        WarehouseProductPropertyEntity,
+        'wpp',
+        'wpp.warehouseProductId = wp.id AND wpp.propertyId IN (:propertyIds) AND wpp.propertyValueId IN (:propertyValueIds)',
+        { propertyIds, propertyValueIds },
+      )
+      .groupBy('wp.id')
+      .where('wp.productId = :productId', { productId })
+      .getRawOne<WarehouseProductEntity>();
+
+    if (!warehouseProduct) {
+      throw new HttpException('Product with properties not found', HttpStatus.NOT_FOUND);
+    }
+
+    return warehouseProduct.quantity;
+  }
+
+  async decreaseProductQuantity(
+    productId: number,
+    properties: Pick<IProductProperty, 'propertyId' | 'propertyValueId'>[],
+    quantity: number,
+  ): Promise<void> {
+    const propertyIds: number[] = properties.map(({ propertyId }) => propertyId);
+    const propertyValueIds: number[] = properties.map(({ propertyValueId }) => propertyValueId);
+
+    const warehouseProduct = await this.warehouseProductRepository
+      .createQueryBuilder('wp')
+      .select(`wp.id, wp.quantity`)
+      .innerJoin(ProductEntity, 'p', 'p.id = wp.productId')
+      .innerJoin(
+        WarehouseProductPropertyEntity,
+        'wpp',
+        'wpp.warehouseProductId = wp.id AND wpp.propertyId IN (:propertyIds) AND wpp.propertyValueId IN (:propertyValueIds)',
+        { propertyIds, propertyValueIds },
+      )
+      .groupBy('wp.id')
+      .where('wp.productId = :productId', { productId })
+      .getRawOne<WarehouseProductEntity>();
+
+    if (!warehouseProduct) {
+      throw new HttpException('Product with properties not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (warehouseProduct.quantity < quantity) {
+      throw new HttpException(
+        `Warehouse [ID:${warehouseProduct.id}] quantity is ${warehouseProduct.quantity} and this is less than: ${quantity}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.warehouseProductRepository
+      .createQueryBuilder()
+      .update({ quantity: _round(warehouseProduct.quantity - quantity, 0) })
+      .where("id = :id", { id: warehouseProduct.id })
+      .execute();
   }
 }

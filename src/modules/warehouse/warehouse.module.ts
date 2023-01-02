@@ -20,6 +20,7 @@ import { WarehouseProductPropertyEntity } from '../../entity/warehouseProductPro
   ],
   providers: [WarehouseService],
   controllers: [WarehouseController],
+  exports: [WarehouseService]
 })
 export class WarehouseModule {
 }

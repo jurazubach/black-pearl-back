@@ -18,10 +18,10 @@ export class ProductController {
     description: 'Алиас товара',
     example: 'hoodie_first',
   })
-  @ApiOperation({ summary: 'Возвращает расширенную информацию по конкретном продукте' })
+  @ApiOperation({ summary: 'Возвращает расширенную информацию по конкретному продукту' })
   @HttpCode(HttpStatus.OK)
   async getProduct(@Param('alias') alias: string, @I18nLang() lang: string) {
-    const product = await this.productService.getProduct(alias, lang);
+    const product = await this.productService.getProduct({ alias }, lang);
 
     return { data: product };
   }

@@ -1,7 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { ProductEntity } from './product.entity';
 
 @Entity({ name: "order_products" })
-export class OrderEntity {
+export class OrderProductEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -11,15 +12,12 @@ export class OrderEntity {
   @Column({ type: "int", nullable: false })
   productId: number;
 
-  @Column({ type: "varchar", nullable: false })
-  size: string;
-
-  @Column({ type: "varchar", nullable: false })
-  color: string;
-
   @Column({ type: "int", nullable: false })
-  amount: number;
+  quantity: number;
 
   @Column({ type: "int", nullable: false })
   price: number;
+
+  orderProductId: number;
+  product: ProductEntity;
 }

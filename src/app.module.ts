@@ -8,7 +8,6 @@ import {
   CookieResolver,
   HeaderResolver,
 } from "nestjs-i18n";
-
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./modules/auth/auth.module";
@@ -18,6 +17,9 @@ import { ProductModule } from './modules/product/product.module';
 import { WarehouseModule } from './modules/warehouse/warehouse.module';
 import { CategoryModule } from "./modules/category/category.module";
 import { CollectionModule } from "./modules/collection/collection.module";
+import { CustomerModule } from "./modules/customer/customer.module";
+import { OrderModule } from "./modules/order/order.module";
+import { CouponModule } from "./modules/coupon/coupon.module";
 import { getMysqlConfig } from "src/configs/mysql.config";
 import { getIntlConfig } from "src/configs/intl.config";
 import { getStaticConfig } from "src/configs/static.config";
@@ -46,6 +48,9 @@ import { getStaticConfig } from "src/configs/static.config";
     ProductModule,
     WarehouseModule,
     CollectionModule,
+    CustomerModule,
+    OrderModule,
+    CouponModule,
     SeoModule,
   ],
   controllers: [AppController],

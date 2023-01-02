@@ -24,5 +24,6 @@ import { CollectionProductEntity } from '../../entity/collectionProduct.entity';
   ],
   providers: [ProductService],
   controllers: [ProductController],
+  exports: [ProductService],
 })
 export class ProductModule {}

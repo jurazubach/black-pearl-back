@@ -6,6 +6,7 @@ import glob from 'glob';
 import { CollectionEntity } from '../../entity/collection.entity';
 import { ConfigService } from '@nestjs/config';
 import _last from 'lodash/last';
+import { IPagination } from '../../decorators/pagination.decorators';
 
 @Injectable()
 export class CollectionService {
@@ -59,10 +60,12 @@ export class CollectionService {
     return paths;
   }
 
-  async getCollectionList(lang: string) {
+  async getCollectionList(pagination: IPagination, lang: string) {
     const collections = await this.collectionRepository
       .createQueryBuilder('c')
       .select(`c.id, c.alias`)
+      .limit(pagination.limit)
+      .offset(pagination.offset)
       .getRawMany<CollectionEntity>();
 
     return Promise.all(collections.map((collection) => this.wrapCollection(collection, lang)));

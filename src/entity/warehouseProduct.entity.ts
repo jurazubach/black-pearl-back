@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { ProductEntity } from './product.entity';
 
 @Entity({ name: "warehouse_products" })
 export class WarehouseProductEntity {
@@ -9,7 +10,7 @@ export class WarehouseProductEntity {
   productId: number;
 
   @Column({ type: "int", nullable: false })
-  amount: number;
+  quantity: number;
 
   @Column({ type: "int", nullable: false })
   price: number;
@@ -22,4 +23,6 @@ export class WarehouseProductEntity {
 
   @Column({ type: "datetime", nullable: false, default: () => "CURRENT_TIMESTAMP" })
   createdAt: string;
+
+  product: ProductEntity;
 }

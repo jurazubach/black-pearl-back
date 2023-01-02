@@ -107,11 +107,7 @@ export class UserController {
       email: auth.email,
     });
 
-    // TODO: добавить проверки и удаление разничных штук
     await this.userService.deleteUser(user);
-
-    // TODO: добавить отправку емейла что юзер полностью всё удалился
-    // await this.mailService.sendUserDelete(user);
 
     const cookieName = this.configService.get("JWT_COOKIE_NAME");
     res.clearCookie(cookieName, {

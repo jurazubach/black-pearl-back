@@ -2,13 +2,13 @@ import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 import { PropertyEntity } from './property.entity';
 import { PropertyValueEntity } from './propertyValue.entity';
 
-@Entity({ name: "product_properties" })
-export class ProductPropertyEntity {
+@Entity({ name: "order_product_properties" })
+export class OrderProductPropertyEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: "int", nullable: false })
-  productId: number;
+  orderProductId: number;
 
   @Column({ type: "int", nullable: false })
   propertyId: number;

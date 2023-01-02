@@ -58,9 +58,9 @@ export class AuthService {
 
   setJwtToCookie(token: string, res: Response) {
     const cookieName = this.configService.get("JWT_COOKIE_NAME");
-    const cookieExp = this.configService.get("JWT_EXP");
+    const [expValue, expUnit] = this.configService.get("JWT_EXP").split('');
 
-    const date = dayjs().add(cookieExp);
+    const date = dayjs().add(expValue, expUnit);
 
     res.cookie(cookieName, token, {
       domain: this.configService.get("COOKIE_DOMAIN"),

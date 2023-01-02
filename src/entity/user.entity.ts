@@ -1,10 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
-export enum USER_TYPE {
-  CUSTOMER = "customer", // не зареганный
-  USER = "user", // уже зареганный
-}
-
 export enum USER_ROLE {
   ADMIN = "admin",
   USER = "user",
@@ -20,9 +15,6 @@ export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false, type: 'enum', enum: USER_TYPE, default: USER_TYPE.CUSTOMER })
-  type: USER_TYPE;
-
   @Column({ type: "varchar", nullable: true })
   firstName: string | null;
 
@@ -31,21 +23,6 @@ export class UserEntity {
 
   @Column({ type: "varchar", unique: true, nullable: false })
   email: string;
-
-  @Column({ type: "varchar", nullable: true })
-  city: string | null;
-
-  @Column({ type: "varchar", nullable: true })
-  region: string | null;
-
-  @Column({ type: "varchar", nullable: true })
-  address: string | null;
-
-  @Column({ type: "varchar", nullable: true })
-  house: string | null;
-
-  @Column({ type: "varchar", nullable: true })
-  phone: string | null;
 
   @Column({ type: "varchar", nullable: true })
   password: string | null;

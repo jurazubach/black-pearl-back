@@ -2,6 +2,7 @@ import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { I18nLang } from 'nestjs-i18n';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CollectionService } from './collection.service';
+import { IPagination, Pagination } from '../../decorators/pagination.decorators';
 
 @ApiTags('Collections')
 @Controller('collections')
@@ -14,8 +15,10 @@ export class CollectionController {
   @Get()
   @ApiOperation({ summary: 'Возвращает список коллекций' })
   @HttpCode(HttpStatus.OK)
-  async getCollectionList(@I18nLang() lang: string) {
-    const collections = await this.collectionService.getCollectionList(lang);
+  async getCollectionList(
+    @Pagination() pagination: IPagination,
+    @I18nLang() lang: string) {
+    const collections = await this.collectionService.getCollectionList(pagination, lang);
 
     return { data: collections };
   }

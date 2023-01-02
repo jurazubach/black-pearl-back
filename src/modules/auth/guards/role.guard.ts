@@ -4,8 +4,8 @@ import { USER_ROLE } from "src/entity/user.entity";
 import { IJwtToken } from "../auth.interfaces";
 
 const ROLE_HIERARCHY = {
-  [USER_ROLE.ADMIN]: [USER_ROLE.ADMIN, USER_ROLE.USER],
-  [USER_ROLE.USER]: [USER_ROLE.USER],
+  [USER_ROLE.USER]: [USER_ROLE.ADMIN, USER_ROLE.USER],
+  [USER_ROLE.ADMIN]: [USER_ROLE.USER],
 };
 
 @Injectable()

@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { CouponEntity } from './coupon.entity';
 
 export enum ORDER_TYPE {
   OPEN = "open",
@@ -20,7 +21,7 @@ export class OrderEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", unique: true, nullable: false })
+  @Column({ type: "varchar", nullable: false })
   email: string;
 
   @Column({ type: "varchar", nullable: false })
@@ -39,13 +40,16 @@ export class OrderEntity {
   address: string;
 
   @Column({ type: "varchar", nullable: false })
-  house: string;
+  flat: string;
 
   @Column({ type: "varchar", nullable: false })
   phone: string;
 
-  @Column({ type: "varchar", nullable: false })
-  number: string; // новой почты или другой службы заказ
+  @Column({ type: "int", nullable: true })
+  couponId: number | null;
+
+  @Column({ type: "boolean", nullable: false, default: false })
+  approved: boolean;
 
   @Column({
     nullable: false,
@@ -69,4 +73,6 @@ export class OrderEntity {
     default: () => "CURRENT_TIMESTAMP",
   })
   createdAt: string;
+
+  coupon: CouponEntity | null;
 }
