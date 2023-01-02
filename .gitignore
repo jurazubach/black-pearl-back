@@ -5,5 +5,4 @@ src/tmp/images/*
 .idea
 .env
 horobri-mysql/*
-cert/*
-
+!/cert/
