@@ -4,5 +4,5 @@ src/historyData/*
 src/tmp/images/*
 .idea
 .env
-horobri-mysql/*
-!/cert/
+horobri-mysql
+cert
