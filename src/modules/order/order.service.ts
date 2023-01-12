@@ -8,11 +8,7 @@ import { CustomerEntity } from '../../entity/customer.entity';
 import { ORDER_PAYMENT, ORDER_TYPE, OrderEntity } from '../../entity/order.entity';
 import { OrderProductEntity } from '../../entity/orderProduct.entity';
 import { ProductEntity } from '../../entity/product.entity';
-import { OrderProductPropertyEntity } from '../../entity/orderProductProperty.entity';
-import { PropertyEntity } from '../../entity/property.entity';
-import { PropertyValueEntity } from '../../entity/propertyValue.entity';
 import { I18nService } from 'nestjs-i18n';
-import { formatProductProperties, IProductProperty } from '../product/product.helper';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 import { ProductService } from '../product/product.service';
 import { CouponEntity } from '../../entity/coupon.entity';
@@ -29,8 +25,6 @@ export class OrderService {
     private readonly orderRepository: Repository<OrderEntity>,
     @InjectRepository(OrderProductEntity)
     private readonly orderProductRepository: Repository<OrderProductEntity>,
-    @InjectRepository(OrderProductPropertyEntity)
-    private readonly orderProductPropertyRepository: Repository<OrderProductPropertyEntity>,
     private readonly i18n: I18nService,
     private readonly productService: ProductService,
     private readonly warehouseService: WarehouseService,
@@ -47,9 +41,9 @@ export class OrderService {
           'id', c.id,
           'type', c.type,
           'code', c.code,
-          'percent', c.percent,
-          'price', c.price,
-          'createdAt', c.createdAt,
+          'discountType', c.discountType,
+          'discount', c.discount,
+          'startAt', c.startAt,
           'endAt', c.endAt
         ), NULL) as coupon
       `)
@@ -73,9 +67,9 @@ export class OrderService {
           'id', c.id,
           'type', c.type,
           'code', c.code,
-          'percent', c.percent,
-          'price', c.price,
-          'createdAt', c.createdAt,
+          'discountType', c.discountType,
+          'discount', c.discount,
+          'startAt', c.startAt,
           'endAt', c.endAt
         ), NULL) as coupon
       `)
@@ -96,8 +90,10 @@ export class OrderService {
           .createQueryBuilder('op')
           .select(
             `op.id as orderProductId,
+            op.oldPrice,
             op.price,
             op.quantity,
+            op.size,
             JSON_OBJECT(
               'id', p.id,
               'alias', p.alias,
@@ -120,45 +116,8 @@ export class OrderService {
       }),
     );
 
-    const orderProductPromises: Promise<any>[] = [];
-    orderProducts.forEach(({ products }) => {
-      return products.forEach(({ orderProductId }) => {
-        orderProductPromises.push(
-          this.orderProductPropertyRepository
-            .createQueryBuilder('opp')
-            .select(`
-            property.id as propertyId,
-            property.alias as propertyAlias,
-            propertyValue.id as propertyValueId,
-            propertyValue.alias as propertyValueAlias
-            `)
-            .innerJoin(PropertyEntity, 'property', 'property.id = opp.propertyId')
-            .innerJoin(PropertyValueEntity, 'propertyValue', 'propertyValue.id = opp.propertyValueId AND propertyValue.propertyId = property.id')
-            .where('opp.orderProductId = :orderProductId', { orderProductId })
-            .getRawMany<IProductProperty>()
-            .then(async (productProperties) => {
-              const properties = await formatProductProperties(lang, this.i18n, productProperties);
-              return { orderProductId, properties };
-            }),
-        );
-      });
-    });
-
-    const orderProductProperties = await Promise.all(orderProductPromises);
-
-    const orderProductsWithProperties = orderProducts.map((orderProduct) => {
-      return {
-        orderId: orderProduct.orderId,
-        products: orderProduct.products.map((product) => {
-          let matchProperties = orderProductProperties.find((i) => i.orderProductId);
-
-          return { ...product, properties: matchProperties ? matchProperties.properties : [] };
-        }),
-      };
-    });
-
     orderEntities.forEach((order) => {
-      const matchProducts = orderProductsWithProperties.find((i) => i.orderId === order.id);
+      const matchProducts = orderProducts.find((i) => i.orderId === order.id);
 
       orders.push({
         ...order,
@@ -214,7 +173,7 @@ export class OrderService {
         const product = await this.productService.getPureProduct({ id: payloadOrderProduct.productId });
         const availableQuantity = await this.warehouseService.calculateAvailableProductQuantity(
           payloadOrderProduct.productId,
-          payloadOrderProduct.productProperties,
+          payloadOrderProduct.size,
         );
 
         if (availableQuantity < payloadOrderProduct.quantity) {
@@ -230,24 +189,14 @@ export class OrderService {
           productId: product.id,
           quantity: payloadOrderProduct.quantity,
           price: payloadOrderProduct.price,
+          size: payloadOrderProduct.size,
         })
         await this.warehouseService.decreaseProductQuantity(
           payloadOrderProduct.productId,
-          payloadOrderProduct.productProperties,
           payloadOrderProduct.quantity,
+          payloadOrderProduct.size,
         );
-        const orderProduct = await this.orderProductRepository.save(orderProductEntity, { transaction: false });
-
-        for await (const payloadOrderProductProperty of payloadOrderProduct.productProperties) {
-          const orderProductPropertyEntity = new OrderProductPropertyEntity();
-          Object.assign(orderProductPropertyEntity, {
-            orderProductId: orderProduct.id,
-            propertyId: payloadOrderProductProperty.propertyId,
-            propertyValueId: payloadOrderProductProperty.propertyValueId,
-          });
-
-          await this.orderProductPropertyRepository.save(orderProductPropertyEntity, { transaction: false });
-        }
+        await this.orderProductRepository.save(orderProductEntity, { transaction: false });
       }
 
       await queryRunner.commitTransaction();

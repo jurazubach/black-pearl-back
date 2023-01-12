@@ -10,5 +10,23 @@
   },
   "cotton": {
     "title": "Бавовна"
+  },
+  "XS": {
+    "title": "XS"
+  },
+  "S": {
+    "title": "S"
+  },
+  "M": {
+    "title": "M"
+  },
+  "L": {
+    "title": "L"
+  },
+  "XL": {
+    "title": "XL"
+  },
+  "XXL": {
+    "title": "XXL"
   }
 }

@@ -22,8 +22,9 @@ export class WarehouseController {
   @HttpCode(HttpStatus.OK)
   async getProductInWarehouse(@Param('alias') alias: string, @I18nLang() lang: string) {
     const product = await this.warehouseService.getPureProduct(alias);
+    const goods = await this.warehouseService.getProductsGoods(product.id);
     const similarProducts = await this.warehouseService.getSimilarProducts(product.id, lang);
 
-    return { data: similarProducts };
+    return { data: { goods, similarProducts } };
   }
 }

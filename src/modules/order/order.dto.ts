@@ -1,18 +1,9 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
-import { IsArrayOfObjects } from "src/decorators/isArrayObject.decorators";
-import { ORDER_PAYMENT, ORDER_TYPE } from '../../entity/order.entity';
-
-export class OrderProductPropertyDto {
-  @IsNotEmpty()
-  @ApiProperty({ example: 2515 })
-  propertyId: number;
-
-  @IsNotEmpty()
-  @ApiProperty({ example: 2515 })
-  propertyValueId: number;
-}
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsEmail, IsEnum, IsIn, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
+import { IsArrayOfObjects } from 'src/decorators/isArrayObject.decorators';
+import { ORDER_PAYMENT, ORDER_TYPE } from 'src/entity/order.entity';
+import { TWarehouseProductSize, WAREHOUSE_PRODUCT_SIZE } from 'src/entity/warehouseProduct.entity';
 
 export class OrderProductDto {
   @IsNotEmpty()
@@ -27,48 +18,48 @@ export class OrderProductDto {
   @ApiProperty({ example: 1200 })
   price: number;
 
-  @IsArrayOfObjects()
-  @Type(() => OrderProductPropertyDto)
-  @ValidateNested()
-  productProperties: OrderProductPropertyDto[];
+  @IsIn(Object.values(WAREHOUSE_PRODUCT_SIZE))
+  @IsOptional()
+  @ApiProperty({ example: WAREHOUSE_PRODUCT_SIZE.S })
+  size: TWarehouseProductSize;
 }
 
 export class CreateOrderDto {
   @IsNotEmpty()
-  @ApiProperty({ example: "Admin" })
+  @ApiProperty({ example: 'Admin' })
   firstName: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "Adminovich" })
+  @ApiProperty({ example: 'Adminovich' })
   lastName: string;
 
   @IsEmail()
   @IsNotEmpty()
-  @ApiProperty({ example: "test@test.com" })
+  @ApiProperty({ example: 'test@test.com' })
   email: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "Kyiv" })
+  @ApiProperty({ example: 'Kyiv' })
   city: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "Kyiv region" })
+  @ApiProperty({ example: 'Kyiv region' })
   region: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "Lomonosova 50/2" })
+  @ApiProperty({ example: 'Lomonosova 50/2' })
   address: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "26" })
+  @ApiProperty({ example: '26' })
   flat: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "0997301529" })
+  @ApiProperty({ example: '0997301529' })
   phone: string;
 
   @IsOptional()
-  @ApiProperty({ example: "HAPPY_NEW_YEAR" })
+  @ApiProperty({ example: 'HAPPY_NEW_YEAR' })
   couponCode?: string;
 
   @IsOptional()
@@ -83,36 +74,36 @@ export class CreateOrderDto {
 
 export class UpdateOrderDto {
   @IsOptional()
-  @ApiProperty({ example: "Admin" })
+  @ApiProperty({ example: 'Admin' })
   firstName?: string;
 
   @IsOptional()
-  @ApiProperty({ example: "Adminovich" })
+  @ApiProperty({ example: 'Adminovich' })
   lastName?: string;
 
   @IsEmail()
   @IsOptional()
-  @ApiProperty({ example: "test@test.com" })
+  @ApiProperty({ example: 'test@test.com' })
   email: string;
 
   @IsOptional()
-  @ApiProperty({ example: "Kyiv" })
+  @ApiProperty({ example: 'Kyiv' })
   city?: string;
 
   @IsOptional()
-  @ApiProperty({ example: "Kyiv region" })
+  @ApiProperty({ example: 'Kyiv region' })
   region?: string;
 
   @IsOptional()
-  @ApiProperty({ example: "Lomonosova 50/2" })
+  @ApiProperty({ example: 'Lomonosova 50/2' })
   address?: string;
 
   @IsOptional()
-  @ApiProperty({ example: "26" })
+  @ApiProperty({ example: '26' })
   flat?: string;
 
   @IsOptional()
-  @ApiProperty({ example: "0997301529" })
+  @ApiProperty({ example: '0997301529' })
   phone?: string;
 
   @IsOptional()

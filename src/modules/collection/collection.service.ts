@@ -21,7 +21,7 @@ export class CollectionService {
   async getCollection(alias: string, lang: string) {
     const collection = await this.collectionRepository
       .createQueryBuilder('c')
-      .select(`c.id, c.alias`)
+      .select(`c.id, c.alias, c.title${lang} as title, c.description${lang} as description`)
       .where('c.alias = :alias', { alias })
       .getRawOne<CollectionEntity>();
 
@@ -29,13 +29,10 @@ export class CollectionService {
       throw new HttpException('Collection not found', HttpStatus.NOT_FOUND);
     }
 
-    return this.wrapCollection(collection, lang);
+    return this.wrapCollection(collection);
   }
 
-  async wrapCollection(collection: CollectionEntity, lang: string) {
-    const collectionTrans = await this.i18n.t(`collections.${collection.alias}`, { lang });
-    Object.assign(collection, collectionTrans);
-
+  async wrapCollection(collection: CollectionEntity) {
     const images = await this.getCollectionImages(collection.alias);
     Object.assign(collection, { images });
 
@@ -63,11 +60,11 @@ export class CollectionService {
   async getCollectionList(pagination: IPagination, lang: string) {
     const collections = await this.collectionRepository
       .createQueryBuilder('c')
-      .select(`c.id, c.alias`)
+      .select(`c.id, c.alias, c.title${lang} as title, c.description${lang} as description`)
       .limit(pagination.limit)
       .offset(pagination.offset)
       .getRawMany<CollectionEntity>();
 
-    return Promise.all(collections.map((collection) => this.wrapCollection(collection, lang)));
+    return Promise.all(collections.map((collection) => this.wrapCollection(collection)));
   }
 }

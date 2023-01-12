@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 import { ProductEntity } from './product.entity';
+import { TWarehouseProductSize, WAREHOUSE_PRODUCT_SIZE } from './warehouseProduct.entity';
 
 @Entity({ name: "order_products" })
 export class OrderProductEntity {
@@ -18,6 +19,8 @@ export class OrderProductEntity {
   @Column({ type: "int", nullable: false })
   price: number;
 
-  orderProductId: number;
+  @Column({ nullable: false, type: 'enum', enum: WAREHOUSE_PRODUCT_SIZE, default: WAREHOUSE_PRODUCT_SIZE.XS })
+  size: TWarehouseProductSize;
+
   product: ProductEntity;
 }

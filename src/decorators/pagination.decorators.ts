@@ -13,12 +13,13 @@ export const Pagination = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): IPagination => {
     const req = ctx.switchToHttp().getRequest();
     const page = Number(get(req, "query.page", DEFAULT_PAGE));
+    const validPage = page < 1 ? 1 : page;
     const pageSize = Number(get(req, "query.pageSize", DEFAULT_PAGE_SIZE));
 
     return {
-      page,
+      page: validPage,
       pageSize,
-      offset: (page - 1) * pageSize,
+      offset: (validPage - 1) * pageSize,
       limit: pageSize + 1,
     };
   }

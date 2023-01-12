@@ -5,6 +5,11 @@ export enum COUPON_TYPE {
   MULTIPLE = 'multiple',
 }
 
+export enum COUPON_DISCOUNT_TYPE {
+  PERCENT = 'percent',
+  PRICE = 'price',
+}
+
 @Entity({ name: 'coupons' })
 export class CouponEntity {
   @PrimaryGeneratedColumn()
@@ -16,15 +21,17 @@ export class CouponEntity {
   @Column({ type: 'varchar', nullable: false })
   code: string;
 
-  // TODO: либо percent либо фиксированная цена
-  @Column({ type: 'int', nullable: true })
-  percent: number;
+  @Column({ nullable: false, type: 'enum', enum: COUPON_DISCOUNT_TYPE, default: COUPON_DISCOUNT_TYPE.PERCENT })
+  discountType: COUPON_DISCOUNT_TYPE;
 
   @Column({ type: 'int', nullable: true })
-  price: number;
+  discount: number;
 
   @Column({ type: 'datetime', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   createdAt: string;
+
+  @Column({ type: 'datetime', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
+  startAt: string;
 
   @Column({ type: 'datetime', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   endAt: string;

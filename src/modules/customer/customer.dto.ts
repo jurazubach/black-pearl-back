@@ -24,14 +24,6 @@ export class CustomerDTO {
   region: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "Lomonosova 50/2" })
-  address: string;
-
-  @IsNotEmpty()
-  @ApiProperty({ example: "26" })
-  flat: string;
-
-  @IsNotEmpty()
   @ApiProperty({ example: "0997301529" })
   phone: string;
 }

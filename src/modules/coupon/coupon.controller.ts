@@ -6,7 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  Post,
+  Post, Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CouponService } from './coupon.service';
@@ -14,6 +14,7 @@ import { IPagination, Pagination } from '../../decorators/pagination.decorators'
 import { CouponDto } from './coupon.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { I18nLang } from 'nestjs-i18n';
+import { CustomerDTO } from '../customer/customer.dto';
 
 @ApiTags('Coupons')
 @Controller('coupons')
@@ -61,7 +62,7 @@ export class CouponController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Создание нового клиента' })
+  @ApiOperation({ summary: 'Создание нового купона' })
   @ApiBearerAuth('token')
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
@@ -69,6 +70,17 @@ export class CouponController {
     const coupon = await this.couponService.createCoupon(payload);
 
     return { data: coupon };
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Обновление данные конкретного купона' })
+  @ApiBearerAuth('token')
+  @AuthGuard()
+  @HttpCode(HttpStatus.OK)
+  async updateCoupon(@Param('id') id: number, @Body() payload: CouponDto) {
+    await this.couponService.updateCoupon(id, payload);
+
+    return { data: { status: true } };
   }
 
   @Delete(':id')

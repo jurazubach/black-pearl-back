@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsOptional, Max, Min, IsNumber } from "class-validator";
-import { COUPON_TYPE } from '../../entity/coupon.entity';
+import { COUPON_DISCOUNT_TYPE, COUPON_TYPE } from '../../entity/coupon.entity';
 
 export class CouponDto {
   @IsNotEmpty()
@@ -8,26 +8,24 @@ export class CouponDto {
   @IsEnum(COUPON_TYPE, { each: true })
   type: COUPON_TYPE;
 
-
   @IsOptional()
   @ApiProperty({ example: 'HAPPY_NEW_YEAR' })
   code?: string;
+
+  @IsNotEmpty()
+  @ApiProperty({ example: COUPON_DISCOUNT_TYPE.PERCENT })
+  @IsEnum(COUPON_DISCOUNT_TYPE, { each: true })
+  discountType: COUPON_DISCOUNT_TYPE;
 
   @IsOptional()
   @ApiProperty({ example: 100 })
   @Min(1)
   @IsNumber()
-  price?: number;
+  discount?: number;
 
-  @IsOptional()
-  @ApiProperty({ example: 5 })
-  @Min(1)
-  @Max(100)
-  percent?: number;
-
-  @IsOptional()
-  @ApiProperty({ example: 5 })
-  customerId?: number;
+  @IsNotEmpty()
+  @ApiProperty({ example: "2015-05-20 16:05:00" })
+  startAt: string;
 
   @IsNotEmpty()
   @ApiProperty({ example: "2015-05-20 16:05:00" })

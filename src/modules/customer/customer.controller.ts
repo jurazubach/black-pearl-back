@@ -70,7 +70,6 @@ export class CustomerController {
   @HttpCode(HttpStatus.OK)
   async createCustomer(@Body() payload: CustomerDTO) {
     const isCustomerExist = await this.customerService.isCustomerExistByParams({ email: payload.email });
-
     if (isCustomerExist) throw new HttpException('Customer already exist', HttpStatus.BAD_REQUEST);
 
     const customerEntity = new CustomerEntity();
@@ -80,8 +79,6 @@ export class CustomerController {
       email: payload.email,
       city: payload.city,
       region: payload.region,
-      address: payload.address,
-      flat: payload.flat,
       phone: payload.phone,
     });
     const customer = await this.customerService.createCustomer(customerEntity);
@@ -102,8 +99,6 @@ export class CustomerController {
       email: payload.email,
       city: payload.city,
       region: payload.region,
-      address: payload.address,
-      flat: payload.flat,
       phone: payload.phone,
     });
 

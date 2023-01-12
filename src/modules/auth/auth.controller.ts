@@ -1,22 +1,14 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   HttpCode,
   Res,
-  Query,
   HttpStatus,
-  Redirect,
 } from "@nestjs/common";
 import { Response } from "express";
 import { HttpException } from "@nestjs/common";
-import {
-  LoginDTO,
-  RegisterDTO,
-  RecoverPasswordDTO,
-  ConfirmRecoverPasswordDTO,
-} from "./auth.dto";
+import { LoginDTO, RegisterDTO } from "./auth.dto";
 import { UserService } from "../user/user.service";
 import { AuthService } from "./auth.service";
 import { UserEntity, USER_ROLE } from "../../entity/user.entity";
@@ -101,77 +93,5 @@ export class AuthController {
     await this.mailService.sendUserConfirmEmail(user, confirmEmailToken);
 
     return { data: { success: true } };
-  }
-
-  @Get("confirm/email")
-  @ApiOperation({
-    summary: 'Подтверждение "email" пользователя, при переходе из почты',
-  })
-  @HttpCode(HttpStatus.PERMANENT_REDIRECT)
-  @Redirect()
-  async confirmEmail(@Query("token") token: string) {
-    const user = await this.userService.getUserByToken(
-      AUTHORIZATION_TYPE.CONFIRM_EMAIL,
-      token
-    );
-
-    await this.userService.updateUser(user.id, { isVerify: true });
-
-    return {
-      url: this.urlService.getFrontBaseUrl("/auth/login"),
-      statusCode: HttpStatus.TEMPORARY_REDIRECT,
-    };
-  }
-
-  @Post("recover-password")
-  @ApiOperation({ summary: "Отправка заявки на восстановление пароля" })
-  @HttpCode(HttpStatus.CREATED)
-  async recoverPassword(@Body() payload: RecoverPasswordDTO) {
-    const user = await this.userService.getSecureUserByParams({
-      email: payload.email,
-    });
-
-    await this.userService.clearRecoverTokens(
-      user.id,
-      AUTHORIZATION_TYPE.RECOVER_PASSWORD
-    );
-    const recoverToken = await this.userService.setAuthToken({
-      user: user,
-      type: AUTHORIZATION_TYPE.RECOVER_PASSWORD,
-    });
-
-    await this.mailService.sendUserRecoverPassword(user, recoverToken);
-
-    return { data: { status: "success" } };
-  }
-
-  @Post("confirm/change-password")
-  @ApiOperation({ summary: 'Сохранение "нового пароля" пользователя' })
-  @HttpCode(HttpStatus.OK)
-  async confirmChangePassword(@Body() payload: ConfirmRecoverPasswordDTO) {
-    const user = await this.userService.getUserByToken(
-      AUTHORIZATION_TYPE.RECOVER_PASSWORD,
-      payload.token
-    );
-
-    const generatedSalt = this.authService.generateRandomSalt();
-    const hashedPassword = this.authService.generatePasswordHash(
-      payload.password,
-      generatedSalt
-    );
-
-    await this.userService.updateUser(user.id, {
-      salt: generatedSalt,
-      password: hashedPassword,
-    });
-
-    await this.userService.clearRecoverTokens(
-      user.id,
-      AUTHORIZATION_TYPE.RECOVER_PASSWORD
-    );
-
-    await this.mailService.sendUserSuccessChangePassword(user);
-
-    return { data: { status: "success" } };
   }
 }

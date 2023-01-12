@@ -6,7 +6,6 @@ import { CustomerEntity } from '../../entity/customer.entity';
 import { AuthModule } from '../auth/auth.module';
 import { OrderEntity } from '../../entity/order.entity';
 import { OrderProductEntity } from '../../entity/orderProduct.entity';
-import { OrderProductPropertyEntity } from '../../entity/orderProductProperty.entity';
 import { ProductModule } from '../product/product.module';
 import { CouponEntity } from '../../entity/coupon.entity';
 import { WarehouseModule } from '../warehouse/warehouse.module';
@@ -18,7 +17,6 @@ import { WarehouseModule } from '../warehouse/warehouse.module';
       OrderEntity,
       CouponEntity,
       OrderProductEntity,
-      OrderProductPropertyEntity,
     ]),
     AuthModule,
     ProductModule,

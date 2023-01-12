@@ -15,19 +15,13 @@ export class CustomerEntity {
   email: string;
 
   @Column({ type: "varchar", nullable: false })
+  phone: string;
+
+  @Column({ type: "varchar", nullable: false })
   city: string;
 
   @Column({ type: "varchar", nullable: false })
   region: string;
-
-  @Column({ type: "varchar", nullable: false })
-  address: string;
-
-  @Column({ type: "varchar", nullable: false })
-  flat: string;
-
-  @Column({ type: "varchar", nullable: false })
-  phone: string;
 
   @Column({ type: "datetime", nullable: false, default: () => "CURRENT_TIMESTAMP" })
   createdAt: string;

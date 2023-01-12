@@ -3,7 +3,6 @@ import { I18nService } from 'nestjs-i18n';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _capitalize from 'lodash/capitalize';
-import _get from 'lodash/get';
 import glob from 'glob';
 import { CategoryEntity } from '../../entity/category.entity';
 import { ProductEntity } from '../../entity/product.entity';
@@ -15,6 +14,8 @@ import { ConfigService } from '@nestjs/config';
 import _last from 'lodash/last';
 import { CollectionProductEntity } from '../../entity/collectionProduct.entity';
 import { formatProductProperties, IProductProperty } from './product.helper';
+import { WarehouseProductEntity } from '../../entity/warehouseProduct.entity';
+import { SimilarProductEntity } from '../../entity/similarProduct.entity';
 
 @Injectable()
 export class ProductService {
@@ -25,6 +26,8 @@ export class ProductService {
     private readonly collectionRepository: Repository<CollectionEntity>,
     @InjectRepository(ProductPropertyEntity)
     private readonly productPropertyRepository: Repository<ProductPropertyEntity>,
+    @InjectRepository(WarehouseProductEntity)
+    private readonly warehouseProductRepository: Repository<WarehouseProductEntity>,
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
   ) {
@@ -42,6 +45,48 @@ export class ProductService {
     }
 
     return product;
+  }
+
+  async getSimilarProducts(productId: number, lang: string) {
+    const similarProducts = await this.productRepository
+      .createQueryBuilder('p')
+      .select(`
+        p.id, p.alias,
+        p.singleTitle${_capitalize(lang)} as singleTitle,
+        p.multipleTitle${_capitalize(lang)} as multipleTitle
+        `)
+      .innerJoin(SimilarProductEntity, 'sp', 'sp.similarProductId = p.id')
+      .where('sp.productId = :productId AND p.isActive = 1', { productId })
+      .groupBy('p.id')
+      .getRawMany<ProductEntity>()
+      .then(async (products) => {
+        for await (const product of products) {
+          const images = await this.getProductImages(product.alias);
+          Object.assign(product, { images });
+        }
+
+        return products;
+      });
+
+    const goodsProductsEntities = await Promise.all(
+      similarProducts.map(({ id }) => {
+        return this.warehouseProductRepository
+          .createQueryBuilder('wp')
+          .select(`wp.id, wp.quantity, wp.price, wp.oldPrice, wp.size`)
+          .where('wp.productId = :productId AND wp.quantity > 0', { productId: id })
+          .orderBy('wp.price', 'ASC')
+          .getRawOne<WarehouseProductEntity>()
+          .then((res) => ({ productId: id, minimalGoods: res }));
+      }),
+    );
+
+    similarProducts.forEach((similarProduct) => {
+      const matchGoods = goodsProductsEntities.find(({ productId }) => similarProduct.id === productId);
+
+      Object.assign(similarProduct, { goods: matchGoods && matchGoods.minimalGoods ? [matchGoods.minimalGoods] : [] });
+    });
+
+    return similarProducts;
   }
 
   async getProduct(where: { [key: string]: any }, lang: string) {
@@ -68,12 +113,20 @@ export class ProductService {
 
     const properties = await this.getProductProperties(product['id'], lang);
     const images = await this.getProductImages(product['alias']);
-    const collection = await this.getProductCollection(product['id'], lang);
 
+    const collection = await this.getProductCollection(product['id'], lang);
     if (collection) {
       const collectionImages = await this.getCollectionImages(collection.alias);
       Object.assign(collection, { images: collectionImages });
     }
+
+    const goods = await this.warehouseProductRepository
+      .createQueryBuilder('wp')
+      .select(`wp.id, wp.quantity, wp.price, wp.oldPrice, wp.size`)
+      .where('wp.productId = :productId', { productId: product['id'] })
+      .getRawMany<WarehouseProductEntity>();
+
+    const similarProducts = await this.getSimilarProducts(product['id'], lang);
 
     return {
       ...restProduct,
@@ -81,6 +134,8 @@ export class ProductService {
       collection,
       properties,
       images,
+      goods,
+      similarProducts,
     };
   }
 
@@ -123,7 +178,7 @@ export class ProductService {
   async getProductCollection(productId: number, lang: string) {
     const collection = await this.collectionRepository
       .createQueryBuilder('c')
-      .select(`c.id, c.alias`)
+      .select(`c.id, c.alias, c.title${lang} as title, c.description${lang} as description`)
       .innerJoin(CollectionProductEntity, 'cp', 'cp.productId = :productId', { productId })
       .getRawOne<CollectionEntity>();
 
@@ -131,12 +186,7 @@ export class ProductService {
       return null;
     }
 
-    const collectionTrans = await this.i18n.t(`collections.${collection.alias}`, { lang });
-
-    return {
-      ...collection,
-      ...collectionTrans,
-    };
+    return collection;
   }
 
   async getProductProperties(productId: number, lang: string) {

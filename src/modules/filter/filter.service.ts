@@ -15,6 +15,9 @@ import {
   IFilterModels,
   IStateLangModels,
 } from "./filter.types";
+import { PropertyEntity } from '../../entity/property.entity';
+import { PropertyValueEntity } from '../../entity/propertyValue.entity';
+import { CollectionEntity } from '../../entity/collection.entity';
 
 @Injectable()
 export class FilterService {
@@ -28,10 +31,23 @@ export class FilterService {
   }
 
   private async loadState() {
-    const [categories] = await Promise.all([this.getCategories()]);
+    const [
+      categories,
+      collections,
+      properties,
+      propertyValues,
+    ] = await Promise.all([
+      this.getCategories(),
+      this.getCollections(),
+      this.getProperties(),
+      this.getPropertyValues(),
+    ]);
 
     Object.assign(this.state, {
       [LISTEN_FILTERS.CATEGORIES]: categories,
+      [LISTEN_FILTERS.COLLECTIONS]: collections,
+      [LISTEN_FILTERS.PROPERTIES]: properties,
+      [LISTEN_FILTERS.PROPERTY_VALUES]: propertyValues,
     });
   }
 
@@ -62,6 +78,40 @@ export class FilterService {
       .getRawMany<CategoryEntity>();
 
     return this.translateModels("categories", categories);
+  }
+
+  private async getCollections() {
+    const accumulator: IStateLangModels = { uk: [], en: [] };
+
+    const collections = await this.entityManager
+      .createQueryBuilder(CollectionEntity, "c")
+      .select(`c.id, c.alias, c.titleUk, c.titleEn`)
+      .getRawMany<CollectionEntity>();
+
+    for await (const collection of collections) {
+      accumulator.uk.push({ id: collection.id, alias: collection.alias, title: collection.titleUk });
+      accumulator.en.push({ id: collection.id, alias: collection.alias, title: collection.titleUk });
+    }
+
+    return accumulator;
+  }
+
+  private async getProperties() {
+    const properties = await this.entityManager
+      .createQueryBuilder(PropertyEntity, "p")
+      .select("p.id, p.alias")
+      .getRawMany<PropertyEntity>();
+
+    return this.translateModels("properties", properties);
+  }
+
+  private async getPropertyValues() {
+    const propertyValues = await this.entityManager
+      .createQueryBuilder(PropertyValueEntity, "pv")
+      .select("pv.id, pv.alias")
+      .getRawMany<PropertyValueEntity>();
+
+    return this.translateModels("propertyValues", propertyValues);
   }
 
   private getState(filterName: string, lang: string): any[] {

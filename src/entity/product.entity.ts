@@ -9,7 +9,7 @@ export class ProductEntity {
   @Column({ type: "int", nullable: false })
   categoryId: string;
 
-  @Column({ type: "varchar", nullable: false })
+  @Column({ type: "varchar", unique: true, nullable: false })
   alias: string;
 
   @Column({ type: "boolean", default: false })

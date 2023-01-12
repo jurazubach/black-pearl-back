@@ -40,9 +40,9 @@ export class CustomerService {
             'id', c.id,
             'type', c.type,
             'code', c.code,
-            'percent', c.percent,
-            'price', c.price,
-            'createdAt', c.createdAt,
+            'discountType', c.discountType,
+            'discount', c.discount,
+            'startAt', c.startAt,
             'endAt', c.endAt
           ),
           NULL) as coupon

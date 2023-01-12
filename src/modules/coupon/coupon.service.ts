@@ -8,6 +8,7 @@ import { OrderService } from '../order/order.service';
 import { CouponDto } from './coupon.dto';
 import crypto from 'crypto';
 import _toUpper from 'lodash/toUpper';
+import { CustomerEntity } from '../../entity/customer.entity';
 
 @Injectable()
 export class CouponService {
@@ -41,9 +42,9 @@ export class CouponService {
           'id', c.id,
           'type', c.type,
           'code', c.code,
-          'percent', c.percent,
-          'price', c.price,
-          'createdAt', c.createdAt,
+          'discountType', c.discountType,
+          'discount', c.discount,
+          'startAt', c.startAt,
           'endAt', c.endAt
         ) as coupon
       `)
@@ -57,21 +58,35 @@ export class CouponService {
   }
 
   async createCoupon(payload: CouponDto) {
-    if (!payload.percent && !payload.price) {
-      throw new HttpException('Percent or price is required', HttpStatus.BAD_REQUEST);
-    }
-
     const couponEntity = new CouponEntity();
     Object.assign(couponEntity, {
       type: payload.type,
-      customerId: payload.customerId || null,
-      percent: payload.percent || null,
-      price: payload.price || null,
+      discountType: payload.discountType,
+      discount: payload.discount,
       code: payload.code ? payload.code : _toUpper(crypto.randomBytes(4).toString('hex')),
+      startAt: payload.startAt,
       endAt: payload.endAt,
     });
 
     return this.couponRepository.save(couponEntity);
+  }
+
+  async updateCoupon(id: number, payload: CouponDto) {
+    const couponEntity = new CouponEntity();
+    Object.assign(couponEntity, {
+      type: payload.type,
+      discountType: payload.discountType,
+      discount: payload.discount,
+      code: payload.code ? payload.code : _toUpper(crypto.randomBytes(4).toString('hex')),
+      startAt: payload.startAt,
+      endAt: payload.endAt,
+    });
+
+    await this.couponRepository
+      .createQueryBuilder()
+      .update(payload)
+      .where('id = :id', { id })
+      .execute();
   }
 
   async deleteCoupon(coupon: CouponEntity) {
