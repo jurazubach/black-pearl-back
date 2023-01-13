@@ -30,7 +30,6 @@ import { ProductPropertyEntity } from '../../entity/productProperty.entity';
   ],
   providers: [WarehouseService],
   controllers: [WarehouseController],
-  exports: [WarehouseService]
+  exports: [WarehouseService],
 })
-export class WarehouseModule {
-}
+export class WarehouseModule {}

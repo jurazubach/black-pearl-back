@@ -13,7 +13,7 @@ import { PropertyValueEntity } from '../../entity/propertyValue.entity';
 import { ConfigService } from '@nestjs/config';
 import _last from 'lodash/last';
 import { CollectionProductEntity } from '../../entity/collectionProduct.entity';
-import { formatProductProperties, IProductProperty } from './product.helper';
+import { IProductProperty, IPropertyWithValue } from './product.helper';
 import { WarehouseProductEntity } from '../../entity/warehouseProduct.entity';
 import { SimilarProductEntity } from '../../entity/similarProduct.entity';
 
@@ -30,8 +30,7 @@ export class ProductService {
     private readonly warehouseProductRepository: Repository<WarehouseProductEntity>,
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
-  ) {
-  }
+  ) {}
 
   async getPureProduct(where: { [key: string]: any }) {
     const product = await this.productRepository
@@ -47,14 +46,10 @@ export class ProductService {
     return product;
   }
 
-  async getSimilarProducts(productId: number, lang: string) {
+  async getSimilarProducts(productId: number) {
     const similarProducts = await this.productRepository
       .createQueryBuilder('p')
-      .select(`
-        p.id, p.alias,
-        p.singleTitle${_capitalize(lang)} as singleTitle,
-        p.multipleTitle${_capitalize(lang)} as multipleTitle
-        `)
+      .select(`p.id, p.alias, p.singleTitle, p.multipleTitle`)
       .innerJoin(SimilarProductEntity, 'sp', 'sp.similarProductId = p.id')
       .where('sp.productId = :productId AND p.isActive = 1', { productId })
       .groupBy('p.id')
@@ -89,16 +84,18 @@ export class ProductService {
     return similarProducts;
   }
 
-  async getProduct(where: { [key: string]: any }, lang: string) {
+  async getProduct(where: { [key: string]: any }) {
     const product = await this.productRepository
       .createQueryBuilder('p')
-      .select(`
+      .select(
+        `
         p.id, p.alias,
-        p.singleTitle${_capitalize(lang)} as singleTitle,
-        p.multipleTitle${_capitalize(lang)} as multipleTitle,
-        p.description${_capitalize(lang)} as description,
-        JSON_OBJECT('id', c.id, 'alias', c.alias) as category
-        `)
+        p.singleTitle,
+        p.multipleTitle,
+        p.description,
+        JSON_OBJECT('id', c.id, 'alias', c.alias, 'title', c.title, 'description', c.description) as category
+        `,
+      )
       .where('p.alias = :alias AND p.isActive = 1', where)
       .innerJoin(CategoryEntity, 'c', 'c.id = p.categoryId')
       .getRawOne<ProductEntity>();
@@ -107,18 +104,9 @@ export class ProductService {
       throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
     }
 
-    const { category, ...restProduct } = product;
-    const categoryTrans = await this.i18n.t(`categories.${category.alias}`, { lang });
-    Object.assign(category, categoryTrans);
-
-    const properties = await this.getProductProperties(product['id'], lang);
+    const properties = await this.getProductProperties(product['id']);
     const images = await this.getProductImages(product['alias']);
-
-    const collection = await this.getProductCollection(product['id'], lang);
-    if (collection) {
-      const collectionImages = await this.getCollectionImages(collection.alias);
-      Object.assign(collection, { images: collectionImages });
-    }
+    const collection = await this.getProductCollection(product['id']);
 
     const goods = await this.warehouseProductRepository
       .createQueryBuilder('wp')
@@ -126,11 +114,10 @@ export class ProductService {
       .where('wp.productId = :productId', { productId: product['id'] })
       .getRawMany<WarehouseProductEntity>();
 
-    const similarProducts = await this.getSimilarProducts(product['id'], lang);
+    const similarProducts = await this.getSimilarProducts(product['id']);
 
     return {
-      ...restProduct,
-      category,
+      ...product,
       collection,
       properties,
       images,
@@ -175,10 +162,10 @@ export class ProductService {
     return paths;
   }
 
-  async getProductCollection(productId: number, lang: string) {
+  async getProductCollection(productId: number) {
     const collection = await this.collectionRepository
       .createQueryBuilder('c')
-      .select(`c.id, c.alias, c.title${lang} as title, c.description${lang} as description`)
+      .select(`c.id, c.alias, c.title, c.description`)
       .innerJoin(CollectionProductEntity, 'cp', 'cp.productId = :productId', { productId })
       .getRawOne<CollectionEntity>();
 
@@ -186,19 +173,27 @@ export class ProductService {
       return null;
     }
 
+    const collectionImages = await this.getCollectionImages(collection.alias);
+    Object.assign(collection, { images: collectionImages });
+
     return collection;
   }
 
-  async getProductProperties(productId: number, lang: string) {
-    const productProperties = await this.productPropertyRepository
+  async getProductProperties(productId: number) {
+    return this.productPropertyRepository
       .createQueryBuilder('pp')
-      .select(`property.alias as propertyAlias, propertyValue.alias as propertyValueAlias`)
+      .select(`
+        JSON_OBJECT('id', property.id, 'alias', property.alias, 'title', property.title) as property,
+        JSON_OBJECT('id', propertyValue.id, 'alias', propertyValue.alias, 'title', propertyValue.title) as value
+      `)
       .where('product.id = :id AND product.isActive = 1', { id: productId })
       .innerJoin(ProductEntity, 'product', 'product.id = pp.productId')
       .innerJoin(PropertyEntity, 'property', 'property.id = pp.propertyId')
-      .innerJoin(PropertyValueEntity, 'propertyValue', 'propertyValue.id = pp.propertyValueId AND propertyValue.propertyId = property.id')
-      .getRawMany<IProductProperty>();
-
-    return formatProductProperties(lang, this.i18n, productProperties);
+      .innerJoin(
+        PropertyValueEntity,
+        'propertyValue',
+        'propertyValue.id = pp.propertyValueId AND propertyValue.propertyId = property.id',
+      )
+      .getRawMany<IPropertyWithValue>();
   }
 }

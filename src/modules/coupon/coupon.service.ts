@@ -8,7 +8,6 @@ import { OrderService } from '../order/order.service';
 import { CouponDto } from './coupon.dto';
 import crypto from 'crypto';
 import _toUpper from 'lodash/toUpper';
-import { CustomerEntity } from '../../entity/customer.entity';
 
 @Injectable()
 export class CouponService {
@@ -18,25 +17,21 @@ export class CouponService {
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
     private readonly orderService: OrderService,
-  ) {
-  }
+  ) {}
 
   async getCouponByParams(where: { [key: string]: any }, select: string = '*'): Promise<CouponEntity> {
-    const coupon = await this.couponRepository
-      .createQueryBuilder('c')
-      .where(where)
-      .select(select)
-      .getRawOne<CouponEntity>();
+    const coupon = await this.couponRepository.createQueryBuilder('c').where(where).select(select).getRawOne<CouponEntity>();
 
     if (!coupon) throw new HttpException('Coupon not found', HttpStatus.NOT_FOUND);
 
     return coupon;
   }
 
-  async getCouponOrders(coupon: CouponEntity, pagination: IPagination, lang: string): Promise<object[]> {
+  async getCouponOrders(coupon: CouponEntity, pagination: IPagination): Promise<object[]> {
     const ordersWithCoupons = await this.orderRepository
       .createQueryBuilder('o')
-      .select(`
+      .select(
+        `
         o.*,
         JSON_OBJECT(
           'id', c.id,
@@ -47,14 +42,15 @@ export class CouponService {
           'startAt', c.startAt,
           'endAt', c.endAt
         ) as coupon
-      `)
+      `,
+      )
       .innerJoin(CouponEntity, 'c', 'c.id = o.couponId')
       .limit(pagination.limit)
       .offset(pagination.offset)
       .where('o.couponId = :couponId', { couponId: coupon.id })
       .getRawMany<OrderEntity>();
 
-    return this.orderService.getOrderProducts(ordersWithCoupons, lang);
+    return this.orderService.getOrderProducts(ordersWithCoupons);
   }
 
   async createCoupon(payload: CouponDto) {
@@ -82,11 +78,7 @@ export class CouponService {
       endAt: payload.endAt,
     });
 
-    await this.couponRepository
-      .createQueryBuilder()
-      .update(payload)
-      .where('id = :id', { id })
-      .execute();
+    await this.couponRepository.createQueryBuilder().update(payload).where('id = :id', { id }).execute();
   }
 
   async deleteCoupon(coupon: CouponEntity) {
@@ -97,7 +89,8 @@ export class CouponService {
       .where('o.couponId = :couponId', { couponId: coupon.id })
       .getRawOne<OrderEntity>();
 
-    if (!!hasOrderWithCoupons) throw new HttpException('Coupon can not be deleted, because coupon used', HttpStatus.BAD_REQUEST);
+    if (!!hasOrderWithCoupons)
+      throw new HttpException('Coupon can not be deleted, because coupon used', HttpStatus.BAD_REQUEST);
 
     return this.couponRepository.delete({ id: coupon.id });
   }

@@ -1,28 +1,14 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post, Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CouponService } from './coupon.service';
 import { IPagination, Pagination } from '../../decorators/pagination.decorators';
 import { CouponDto } from './coupon.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { I18nLang } from 'nestjs-i18n';
-import { CustomerDTO } from '../customer/customer.dto';
 
 @ApiTags('Coupons')
 @Controller('coupons')
 export class CouponController {
-  constructor(
-    private readonly couponService: CouponService,
-  ) {
-  }
+  constructor(private readonly couponService: CouponService) {}
 
   @Get()
   @ApiOperation({ summary: 'Возвращает список купонов' })
@@ -50,13 +36,9 @@ export class CouponController {
   @ApiOperation({ summary: 'Возвращает список заказов по конкретному купону' })
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
-  async getCustomerOrders(
-    @Param('id') id: number,
-    @Pagination() pagination: IPagination,
-    @I18nLang() lang: string,
-  ) {
+  async getCustomerOrders(@Param('id') id: number, @Pagination() pagination: IPagination) {
     const coupon = await this.couponService.getCouponByParams({ id });
-    const orders = await this.couponService.getCouponOrders(coupon, pagination, lang);
+    const orders = await this.couponService.getCouponOrders(coupon, pagination);
 
     return { data: orders };
   }

@@ -1,15 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: "property_values" })
+@Entity({ name: 'property_values' })
 export class PropertyValueEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: false })
+  @Column({ type: 'int', nullable: false })
   propertyId: number;
 
-  @Column({ type: "varchar", nullable: false })
+  @Column({ type: 'varchar', nullable: false })
   alias: string;
 
+  @Column({ type: 'varchar', nullable: false })
   title: string;
 }

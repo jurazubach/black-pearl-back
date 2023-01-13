@@ -2,13 +2,9 @@ import { Repository } from 'typeorm';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from 'src/entity/product.entity';
-import {
-  TWarehouseProductSize,
-  WarehouseProductEntity,
-} from 'src/entity/warehouseProduct.entity';
+import { TWarehouseProductSize, WarehouseProductEntity } from 'src/entity/warehouseProduct.entity';
 import _round from 'lodash/round';
 import { SimilarProductEntity } from 'src/entity/similarProduct.entity';
-import _capitalize from 'lodash/capitalize';
 import { ProductService } from '../product/product.service';
 
 @Injectable()
@@ -21,8 +17,7 @@ export class WarehouseService {
     @InjectRepository(SimilarProductEntity)
     private readonly similarProductRepository: Repository<SimilarProductEntity>,
     private readonly productService: ProductService,
-  ) {
-  }
+  ) {}
 
   async getPureProduct(alias: string) {
     const product = await this.productRepository
@@ -46,14 +41,10 @@ export class WarehouseService {
       .getRawMany<WarehouseProductEntity>();
   }
 
-  async getSimilarProducts(productId: number, lang: string) {
+  async getSimilarProducts(productId: number) {
     const similarProducts = await this.productRepository
       .createQueryBuilder('p')
-      .select(`
-        p.id, p.alias,
-        p.singleTitle${_capitalize(lang)} as singleTitle,
-        p.multipleTitle${_capitalize(lang)} as multipleTitle
-        `)
+      .select(`p.id, p.alias, p.singleTitle, p.multipleTitle`)
       .innerJoin(SimilarProductEntity, 'sp', 'sp.similarProductId = p.id')
       .where('sp.productId = :productId AND p.isActive = 1', { productId })
       .groupBy('p.id')
@@ -88,10 +79,7 @@ export class WarehouseService {
     return similarProducts;
   }
 
-  async calculateAvailableProductQuantity(
-    productId: number,
-    size: TWarehouseProductSize,
-  ): Promise<number> {
+  async calculateAvailableProductQuantity(productId: number, size: TWarehouseProductSize): Promise<number> {
     const warehouseProduct = await this.warehouseProductRepository
       .createQueryBuilder('wp')
       .select(`wp.id, wp.quantity`)
@@ -107,11 +95,7 @@ export class WarehouseService {
     return warehouseProduct.quantity;
   }
 
-  async decreaseProductQuantity(
-    productId: number,
-    quantity: number,
-    size: TWarehouseProductSize,
-  ): Promise<void> {
+  async decreaseProductQuantity(productId: number, quantity: number, size: TWarehouseProductSize): Promise<void> {
     const warehouseProduct = await this.warehouseProductRepository
       .createQueryBuilder('wp')
       .select(`wp.id, wp.quantity`)

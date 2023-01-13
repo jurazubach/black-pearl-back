@@ -1,8 +1,8 @@
-import { Module } from "@nestjs/common";
+import { Module } from '@nestjs/common';
 
-import { SeoService } from "./seo.service";
-import { SeoController } from "./seo.controller";
-import { FilterModule } from "../filter/filter.module";
+import { SeoService } from './seo.service';
+import { SeoController } from './seo.controller';
+import { FilterModule } from '../filter/filter.module';
 
 @Module({
   imports: [FilterModule],

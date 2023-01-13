@@ -1,30 +1,15 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpException,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CustomerService } from './customer.service';
 import { IPagination, Pagination } from '../../decorators/pagination.decorators';
 import { CustomerDTO } from './customer.dto';
 import { CustomerEntity } from '../../entity/customer.entity';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { I18nLang } from 'nestjs-i18n';
 
 @ApiTags('Customers')
 @Controller('customers')
 export class CustomerController {
-  constructor(
-    private readonly customerService: CustomerService,
-  ) {
-  }
+  constructor(private readonly customerService: CustomerService) {}
 
   @Get()
   @ApiOperation({ summary: 'Возвращает список клиентов' })
@@ -52,13 +37,9 @@ export class CustomerController {
   @ApiOperation({ summary: 'Возвращает список заказов по конкретному клиенту' })
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
-  async getCustomerOrders(
-    @Param('id') id: number,
-    @Pagination() pagination: IPagination,
-    @I18nLang() lang: string,
-  ) {
+  async getCustomerOrders(@Param('id') id: number, @Pagination() pagination: IPagination) {
     const customer = await this.customerService.getCustomerByParams({ id }, 'c.id, c.email');
-    const customerOrders = await this.customerService.getCustomerOrders(customer, pagination, lang);
+    const customerOrders = await this.customerService.getCustomerOrders(customer, pagination);
 
     return { data: customerOrders };
   }

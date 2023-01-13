@@ -1,9 +1,9 @@
-import uniq from "lodash/uniq";
-import capitalize from "lodash/capitalize";
-import dayjs from "dayjs";
+import uniq from 'lodash/uniq';
+import capitalize from 'lodash/capitalize';
+import dayjs from 'dayjs';
 
-import { ITemplate, IPlaceholders } from "./seo.types";
-import { DEFAULT_PAGE } from "src/constants/pagination";
+import { ITemplate, IPlaceholders } from './seo.types';
+import { DEFAULT_PAGE } from 'src/constants/pagination';
 import {
   ROBOT_TYPES,
   PLACEHOLDER_REGEX,
@@ -11,15 +11,15 @@ import {
   DOUBLE_DELIMITER_REGEX,
   END_DELIMITER_REGEX,
   SPACING_REGEX,
-} from "src/constants/seo";
-import { IFilterModels } from "../filter/filter.types";
-import { LISTEN_FILTERS } from "src/constants/filters";
+} from 'src/constants/seo';
+import { IFilterModels } from '../filter/filter.types';
+import { LISTEN_FILTERS } from 'src/constants/filters';
 
 function getTemplatePlaceholders(template: ITemplate): IPlaceholders {
   let templatePlaceHolders: IPlaceholders = [];
 
   Object.values(template).forEach((templateValue: any) => {
-    if (typeof templateValue === "string") {
+    if (typeof templateValue === 'string') {
       const placeholders: string[] = templateValue.match(/({\w+})/gim) || [];
       templatePlaceHolders = [...templatePlaceHolders, ...placeholders];
     }
@@ -30,47 +30,31 @@ function getTemplatePlaceholders(template: ITemplate): IPlaceholders {
 
 function prepareFilterValues(prefix: string, filterValues: string[]) {
   const firstWord = capitalize(prefix);
-  const concatValues = filterValues
-    .map((value) => capitalize(value))
-    .join(", ");
+  const concatValues = filterValues.map((value) => capitalize(value)).join(', ');
 
   return `${firstWord} - ${concatValues}`;
 }
 
 function replaceRegexp(text: string) {
   return String(text)
-    .replace(BEGIN_DELIMITER_REGEX, "")
-    .replace(END_DELIMITER_REGEX, "")
-    .replace(DOUBLE_DELIMITER_REGEX, "|")
-    .replace(SPACING_REGEX, " ")
+    .replace(BEGIN_DELIMITER_REGEX, '')
+    .replace(END_DELIMITER_REGEX, '')
+    .replace(DOUBLE_DELIMITER_REGEX, '|')
+    .replace(SPACING_REGEX, ' ')
     .trim();
 }
 
-function replacePlaceholder(
-  text: string,
-  placeholderKey: string,
-  placeholderValue: string
-) {
-  return String(text).replace(
-    placeholderKey,
-    placeholderValue ? `| ${placeholderValue} |` : ""
-  );
+function replacePlaceholder(text: string, placeholderKey: string, placeholderValue: string) {
+  return String(text).replace(placeholderKey, placeholderValue ? `| ${placeholderValue} |` : '');
 }
 
-function replacePlaceholders(
-  text: string | number,
-  filledPlaceholders: any
-): string {
+function replacePlaceholders(text: string | number, filledPlaceholders: any): string {
   let beginText = String(text);
 
   const placeholders: string[] = beginText.match(PLACEHOLDER_REGEX) || [];
 
   placeholders.forEach((placeholder) => {
-    beginText = replacePlaceholder(
-      beginText,
-      placeholder,
-      filledPlaceholders[placeholder]
-    );
+    beginText = replacePlaceholder(beginText, placeholder, filledPlaceholders[placeholder]);
   });
 
   return replaceRegexp(beginText);
@@ -79,34 +63,23 @@ function replacePlaceholders(
 function replaceTemplatePlaceholders(
   template: ITemplate,
   filledPlaceholders: { [key: string]: string },
-  calculateFilters: { [key: string]: any }
+  calculateFilters: { [key: string]: any },
 ): void {
-  const {
-    hasOneFilter,
-    hasMoreThatOnePage,
-    hasMoreThatOneFilter,
-    hasMultipleFilters,
-  } = calculateFilters;
+  const { hasOneFilter, hasMoreThatOnePage, hasMoreThatOneFilter, hasMultipleFilters } = calculateFilters;
 
   Object.entries(template).forEach(([templateKey, templateValue]) => {
-    if (templateKey === "h1") {
-      const replaceFilledPlaceholders =
-        hasOneFilter && !hasMultipleFilters
-          ? filledPlaceholders
-          : filledPlaceholders;
+    if (templateKey === 'h1') {
+      const replaceFilledPlaceholders = hasOneFilter && !hasMultipleFilters ? filledPlaceholders : filledPlaceholders;
       // hasOneFilter && !hasMultipleFilters ? filledPlaceholders : {};
       // TODO: реплейс посмотреть, почемуто возвращается {} вместо нормального title
       Object.assign(template, {
-        h1: replacePlaceholders(
-          String(templateValue),
-          replaceFilledPlaceholders
-        ),
+        h1: replacePlaceholders(String(templateValue), replaceFilledPlaceholders),
       });
 
       return;
     }
 
-    if (templateKey === "robots") {
+    if (templateKey === 'robots') {
       if (hasMoreThatOnePage || hasMoreThatOneFilter || hasMultipleFilters) {
         Object.assign(template, { robots: ROBOT_TYPES.NOINDEX_NOFOLLOW });
       }
@@ -116,9 +89,7 @@ function replaceTemplatePlaceholders(
 
     return Object.assign(template, {
       [templateKey]:
-        typeof templateValue === "string"
-          ? replacePlaceholders(String(templateValue), filledPlaceholders)
-          : templateValue,
+        typeof templateValue === 'string' ? replacePlaceholders(String(templateValue), filledPlaceholders) : templateValue,
     });
   });
 }
@@ -137,17 +108,11 @@ function fillPlaceholders(placeholders: IPlaceholders, options: IFillOptions) {
   placeholders.forEach((placeholder) => {
     // из {page} делаем page, и возможно тут же какие-то доп значение
     // через |
-    const filterKey: string = placeholder
-      .replace("{", "")
-      .replace("}", "")
-      .trim();
+    const filterKey: string = placeholder.replace('{', '').replace('}', '').trim();
 
-    if (filterKey === "page") {
+    if (filterKey === 'page') {
       Object.assign(filledPlaceholders, {
-        [placeholder]:
-          Number(page) !== DEFAULT_PAGE
-            ? prepareFilterValues(dictionary["page"], [String(page)])
-            : "",
+        [placeholder]: Number(page) !== DEFAULT_PAGE ? prepareFilterValues(dictionary['page'], [String(page)]) : '',
       });
     }
 
@@ -156,9 +121,7 @@ function fillPlaceholders(placeholders: IPlaceholders, options: IFillOptions) {
       const itemTitles = items.map(({ title }: any) => title);
 
       Object.assign(filledPlaceholders, {
-        [placeholder]: itemTitles.length
-          ? prepareFilterValues(dictionary[filterKey], itemTitles)
-          : "",
+        [placeholder]: itemTitles.length ? prepareFilterValues(dictionary[filterKey], itemTitles) : '',
       });
     }
 
@@ -167,8 +130,8 @@ function fillPlaceholders(placeholders: IPlaceholders, options: IFillOptions) {
       Object.assign(filledPlaceholders, { [placeholder]: metaData[filterKey] });
     }
 
-    if (filterKey === "year") {
-      const currentYear = dayjs().format("YYYY");
+    if (filterKey === 'year') {
+      const currentYear = dayjs().format('YYYY');
       Object.assign(filledPlaceholders, { [placeholder]: currentYear });
     }
   });
@@ -176,8 +139,4 @@ function fillPlaceholders(placeholders: IPlaceholders, options: IFillOptions) {
   return filledPlaceholders;
 }
 
-export {
-  getTemplatePlaceholders,
-  fillPlaceholders,
-  replaceTemplatePlaceholders,
-};
+export { getTemplatePlaceholders, fillPlaceholders, replaceTemplatePlaceholders };

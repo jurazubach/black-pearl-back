@@ -1,7 +1,6 @@
 import { EntityManager, Repository } from 'typeorm';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import _capitalize from 'lodash/capitalize';
 import _first from 'lodash/first';
 import { IPagination } from '../../decorators/pagination.decorators';
 import { CustomerEntity } from '../../entity/customer.entity';
@@ -29,13 +28,13 @@ export class OrderService {
     private readonly productService: ProductService,
     private readonly warehouseService: WarehouseService,
     private readonly entityManager: EntityManager,
-  ) {
-  }
+  ) {}
 
-  async getOrderByParams(where: { [key: string]: any }, lang: string) {
+  async getOrderByParams(where: { [key: string]: any }) {
     const order = await this.orderRepository
       .createQueryBuilder('o')
-      .select(`
+      .select(
+        `
         o.*,
         IF(c.id IS NOT NULL, JSON_OBJECT(
           'id', c.id,
@@ -46,22 +45,24 @@ export class OrderService {
           'startAt', c.startAt,
           'endAt', c.endAt
         ), NULL) as coupon
-      `)
+      `,
+      )
       .leftJoin('coupons', 'c', 'c.id = o.couponId')
       .where(where)
       .getRawOne<OrderEntity>();
 
     if (!order) throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
 
-    const orders = await this.getOrderProducts([order], lang)
+    const orders = await this.getOrderProducts([order]);
 
     return _first(orders);
   }
 
-  async getOrderList(pagination: IPagination, lang: string): Promise<object[]> {
+  async getOrderList(pagination: IPagination): Promise<object[]> {
     const ordersWithCoupons = await this.orderRepository
       .createQueryBuilder('o')
-      .select(`
+      .select(
+        `
         o.*,
         IF(c.id IS NOT NULL, JSON_OBJECT(
           'id', c.id,
@@ -72,16 +73,17 @@ export class OrderService {
           'startAt', c.startAt,
           'endAt', c.endAt
         ), NULL) as coupon
-      `)
+      `,
+      )
       .leftJoin('coupons', 'c', 'c.id = o.couponId')
       .limit(pagination.limit)
       .offset(pagination.offset)
       .getRawMany<OrderEntity>();
 
-    return this.getOrderProducts(ordersWithCoupons, lang);
+    return this.getOrderProducts(ordersWithCoupons);
   }
 
-  async getOrderProducts(orderEntities: OrderEntity[], lang: string) {
+  async getOrderProducts(orderEntities: OrderEntity[]) {
     const orders: any[] = [];
 
     const orderProducts = await Promise.all(
@@ -97,10 +99,11 @@ export class OrderService {
             JSON_OBJECT(
               'id', p.id,
               'alias', p.alias,
-              'singleTitle', p.singleTitle${_capitalize(lang)},
-              'multipleTitle', p.multipleTitle${_capitalize(lang)}
+              'singleTitle', p.singleTitle,
+              'multipleTitle', p.multipleTitle
             ) as product
-            `)
+            `,
+          )
           .innerJoin(OrderEntity, 'o', 'o.id = op.orderId')
           .innerJoin(ProductEntity, 'p', 'p.id = op.productId')
           .where('op.orderId = :orderId', { orderId: id })
@@ -129,22 +132,16 @@ export class OrderService {
   }
 
   async getCouponByParams(where: { [key: string]: any }): Promise<CouponEntity> {
-    const coupon = await this.couponRepository
-      .createQueryBuilder('c')
-      .where(where)
-      .select('*')
-      .getRawOne<CouponEntity>();
-
+    const coupon = await this.couponRepository.createQueryBuilder('c').where(where).select('*').getRawOne<CouponEntity>();
     if (!coupon) throw new HttpException('Coupon not found', HttpStatus.BAD_REQUEST);
-
     return coupon;
   }
 
-  async createOrder(payload: CreateOrderDto, lang: string) {
+  async createOrder(payload: CreateOrderDto) {
     let coupon: CouponEntity | null = null;
 
     if (payload.couponCode) {
-      coupon = await this.getCouponByParams({ code: payload.couponCode })
+      coupon = await this.getCouponByParams({ code: payload.couponCode });
     }
 
     const orderEntity = new OrderEntity();
@@ -161,7 +158,7 @@ export class OrderService {
       couponId: coupon ? coupon.id : null,
       type: ORDER_TYPE.OPEN,
       payment: ORDER_PAYMENT.UN_PAID,
-    })
+    });
 
     const queryRunner = this.entityManager.connection.createQueryRunner();
     try {
@@ -190,7 +187,7 @@ export class OrderService {
           quantity: payloadOrderProduct.quantity,
           price: payloadOrderProduct.price,
           size: payloadOrderProduct.size,
-        })
+        });
         await this.warehouseService.decreaseProductQuantity(
           payloadOrderProduct.productId,
           payloadOrderProduct.quantity,
@@ -201,7 +198,7 @@ export class OrderService {
 
       await queryRunner.commitTransaction();
 
-      return this.getOrderByParams({ id: order.id }, lang);
+      return this.getOrderByParams({ id: order.id });
     } catch (error: any) {
       await queryRunner.rollbackTransaction();
 
@@ -222,10 +219,6 @@ export class OrderService {
 
     Object.assign(order, payload);
 
-    await this.orderRepository
-      .createQueryBuilder()
-      .update(order)
-      .where('id = :id', { id })
-      .execute();
+    await this.orderRepository.createQueryBuilder().update(order).where('id = :id', { id }).execute();
   }
 }

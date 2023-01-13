@@ -1,26 +1,18 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: "collections" })
+@Entity({ name: 'collections' })
 export class CollectionEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", nullable: false })
+  @Column({ type: 'varchar', nullable: false })
   alias: string;
 
-  @Column({ type: "varchar", nullable: false })
-  titleUk: string;
-
-  @Column({ type: "varchar", nullable: false })
-  titleEn: string;
-
-  @Column({ type: "varchar", nullable: false })
-  descriptionUk: string;
-
-  @Column({ type: "varchar", nullable: false })
-  descriptionEn: string;
-
+  @Column({ type: 'varchar', nullable: false })
   title: string;
+
+  @Column({ type: 'varchar', nullable: false })
   description: string;
+
   images: string[];
 }

@@ -1,15 +1,11 @@
 import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { WarehouseService } from './warehouse.service';
-import { I18nLang } from 'nestjs-i18n';
 
 @ApiTags('Warehouse')
 @Controller('warehouse')
 export class WarehouseController {
-  constructor(
-    private readonly warehouseService: WarehouseService,
-  ) {
-  }
+  constructor(private readonly warehouseService: WarehouseService) {}
 
   @Get(':alias')
   @ApiParam({
@@ -20,10 +16,10 @@ export class WarehouseController {
   })
   @ApiOperation({ summary: 'Возвращает расширенную информацию продукта на складе' })
   @HttpCode(HttpStatus.OK)
-  async getProductInWarehouse(@Param('alias') alias: string, @I18nLang() lang: string) {
+  async getProductInWarehouse(@Param('alias') alias: string) {
     const product = await this.warehouseService.getPureProduct(alias);
     const goods = await this.warehouseService.getProductsGoods(product.id);
-    const similarProducts = await this.warehouseService.getSimilarProducts(product.id, lang);
+    const similarProducts = await this.warehouseService.getSimilarProducts(product.id);
 
     return { data: { goods, similarProducts } };
   }

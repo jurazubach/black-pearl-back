@@ -1,39 +1,29 @@
-import { Injectable } from "@nestjs/common";
-import crypto from "crypto";
-import { Response } from "express";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
-import { IJwtToken } from "./auth.interfaces";
-import dayjs from "dayjs";
+import { Injectable } from '@nestjs/common';
+import crypto from 'crypto';
+import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { IJwtToken } from './auth.interfaces';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class AuthService {
   private readonly jwtSecret!: string;
 
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly jwtService: JwtService
-  ) {
-    this.jwtSecret = this.configService.get<string>(
-      "JWT_SECRET",
-      "thisIsSecret"
-    );
+  constructor(private readonly configService: ConfigService, private readonly jwtService: JwtService) {
+    this.jwtSecret = this.configService.get<string>('JWT_SECRET', 'thisIsSecret');
   }
 
   generateRandomSalt() {
-    return crypto.randomBytes(16).toString("hex");
+    return crypto.randomBytes(16).toString('hex');
   }
 
   generatePasswordHash(password: string, salt: string) {
-    return crypto
-      .pbkdf2Sync(password, salt, 1000, 64, "sha512")
-      .toString("hex");
+    return crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
   }
 
   isPasswordValid(password: string, user: any) {
-    const hash = crypto
-      .pbkdf2Sync(password, user.salt, 1000, 64, "sha512")
-      .toString("hex");
+    const hash = crypto.pbkdf2Sync(password, user.salt, 1000, 64, 'sha512').toString('hex');
 
     return hash === user.password;
   }
@@ -57,15 +47,15 @@ export class AuthService {
   }
 
   setJwtToCookie(token: string, res: Response) {
-    const cookieName = this.configService.get("JWT_COOKIE_NAME");
-    const [expValue, expUnit] = this.configService.get("JWT_EXP").split('');
+    const cookieName = this.configService.get('JWT_COOKIE_NAME');
+    const [expValue, expUnit] = this.configService.get('JWT_EXP').split('');
 
     const date = dayjs().add(expValue, expUnit);
 
     res.cookie(cookieName, token, {
-      domain: this.configService.get("COOKIE_DOMAIN"),
-      path: this.configService.get("COOKIE_PATH"),
-      sameSite: "none",
+      domain: this.configService.get('COOKIE_DOMAIN'),
+      path: this.configService.get('COOKIE_PATH'),
+      sameSite: 'none',
       secure: true,
       httpOnly: false,
       expires: date.toDate(),
@@ -73,12 +63,12 @@ export class AuthService {
   }
 
   deleteJwtFromCookie(res: Response) {
-    const cookieName = this.configService.get("JWT_COOKIE_NAME");
+    const cookieName = this.configService.get('JWT_COOKIE_NAME');
 
     res.clearCookie(cookieName, {
-      domain: this.configService.get("COOKIE_DOMAIN"),
-      path: this.configService.get("COOKIE_PATH"),
-      sameSite: "none",
+      domain: this.configService.get('COOKIE_DOMAIN'),
+      path: this.configService.get('COOKIE_PATH'),
+      sameSite: 'none',
       secure: true,
       httpOnly: false,
     });

@@ -1,8 +1,4 @@
-import {
-  registerDecorator,
-  ValidationArguments,
-  ValidationOptions,
-} from 'class-validator';
+import { registerDecorator, ValidationArguments, ValidationOptions } from 'class-validator';
 
 export function IsArrayOfObjects(validationOptions?: ValidationOptions) {
   return (object: any, propertyName: string) => {
@@ -17,10 +13,7 @@ export function IsArrayOfObjects(validationOptions?: ValidationOptions) {
           return (
             Array.isArray(value) &&
             value.length > 0 &&
-            value.every(
-              (element: any) =>
-                element instanceof Object && !(element instanceof Array),
-            )
+            value.every((element: any) => element instanceof Object && !(element instanceof Array))
           );
         },
         defaultMessage: (validationArguments?: ValidationArguments): string =>

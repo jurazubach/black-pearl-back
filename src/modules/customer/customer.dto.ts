@@ -1,29 +1,29 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class CustomerDTO {
   @IsNotEmpty()
-  @ApiProperty({ example: "Admin" })
+  @ApiProperty({ example: 'Admin' })
   firstName: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "Adminovich" })
+  @ApiProperty({ example: 'Adminovich' })
   lastName: string;
 
   @IsEmail()
   @IsNotEmpty()
-  @ApiProperty({ example: "test@test.com" })
+  @ApiProperty({ example: 'test@test.com' })
   email: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "Kyiv" })
+  @ApiProperty({ example: 'Kyiv' })
   city: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "Kyiv region" })
+  @ApiProperty({ example: 'Kyiv region' })
   region: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "0997301529" })
+  @ApiProperty({ example: '0997301529' })
   phone: string;
 }

@@ -14,8 +14,7 @@ export class CustomerService {
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
     private readonly orderService: OrderService,
-  ) {
-  }
+  ) {}
 
   async getCustomerByParams(where: { [key: string]: any }, select: string = '*'): Promise<CustomerEntity> {
     const customer = await this.customerRepository
@@ -29,10 +28,11 @@ export class CustomerService {
     return customer;
   }
 
-  async getCustomerOrders(customer: CustomerEntity, pagination: IPagination, lang: string): Promise<object[]> {
+  async getCustomerOrders(customer: CustomerEntity, pagination: IPagination): Promise<object[]> {
     const ordersWithCoupons = await this.orderRepository
       .createQueryBuilder('o')
-      .select(`
+      .select(
+        `
         o.*,
         IF(
           c.id IS NOT NULL,
@@ -46,22 +46,19 @@ export class CustomerService {
             'endAt', c.endAt
           ),
           NULL) as coupon
-      `)
+      `,
+      )
       .leftJoin('coupons', 'c', 'c.id = o.couponId')
       .limit(pagination.limit)
       .offset(pagination.offset)
       .where('o.email = :email', { email: customer.email })
       .getRawMany<OrderEntity>();
 
-    return this.orderService.getOrderProducts(ordersWithCoupons, lang);
+    return this.orderService.getOrderProducts(ordersWithCoupons);
   }
 
   async isCustomerExistByParams(where: { [key: string]: any }) {
-    const customer = await this.customerRepository
-      .createQueryBuilder()
-      .where(where)
-      .select('id')
-      .getRawOne();
+    const customer = await this.customerRepository.createQueryBuilder().where(where).select('id').getRawOne();
 
     return !!customer;
   }
@@ -71,11 +68,7 @@ export class CustomerService {
   }
 
   async updateCustomer(id: number, payload: CustomerEntity) {
-    await this.customerRepository
-      .createQueryBuilder()
-      .update(payload)
-      .where('id = :id', { id })
-      .execute();
+    await this.customerRepository.createQueryBuilder().update(payload).where('id = :id', { id }).execute();
   }
 
   async deleteCustomerById(id: number) {

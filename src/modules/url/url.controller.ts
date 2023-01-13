@@ -1,26 +1,19 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Redirect,
-} from "@nestjs/common";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
-import { UrlService } from "./url.service";
+import { Controller, Get, HttpCode, HttpStatus, Param, Redirect } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UrlService } from './url.service';
 
-@ApiTags("Url")
-@Controller("url")
+@ApiTags('Url')
+@Controller('url')
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
 
-  @Get("s/:hash")
+  @Get('s/:hash')
   @ApiOperation({
-    summary: "Декодирует hash и делает редирект по сохранённому URL",
+    summary: 'Декодирует hash и делает редирект по сохранённому URL',
   })
   @HttpCode(HttpStatus.PERMANENT_REDIRECT)
   @Redirect()
-  async checkAndRedirect(@Param("hash") hash: string) {
+  async checkAndRedirect(@Param('hash') hash: string) {
     const url = await this.urlService.decodeHash(hash);
 
     // TODO: тут сохранять и делать разную аналитику, авторизован юзер был

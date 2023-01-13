@@ -1,12 +1,12 @@
-import fs from "fs";
-import path from "path";
-import { ValidationPipe } from "@nestjs/common";
-import { NestFactory } from "@nestjs/core";
-import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
-import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
-import { HttpExceptionFilter } from "src/exceptions/http-exception.filter";
-import { AppModule } from "./app.module";
+import fs from 'fs';
+import path from 'path';
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import { HttpExceptionFilter } from 'src/exceptions/http-exception.filter';
+import { AppModule } from './app.module';
 
 dotenv.config();
 
@@ -14,17 +14,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
       origin: true,
-      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true,
       optionsSuccessStatus: 204,
     },
     httpsOptions: {
-      key: fs.readFileSync(
-        path.resolve("./cert/api.horobri.local-key.pem")
-      ),
-      cert: fs.readFileSync(
-        path.resolve("./cert/api.horobri.local.pem")
-      ),
+      key: fs.readFileSync(path.resolve('./cert/api.horobri.local-key.pem')),
+      cert: fs.readFileSync(path.resolve('./cert/api.horobri.local.pem')),
     },
   });
 
@@ -35,27 +31,22 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
-      disableErrorMessages: process.env.ENV !== "dev",
-    })
+      disableErrorMessages: process.env.ENV !== 'dev',
+    }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const swaggerOptions = new DocumentBuilder()
-    .setTitle("Horobri")
-    .setDescription("The API description")
-    .setVersion("1.0")
+    .setTitle('Horobri')
+    .setDescription('The API description')
+    .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, swaggerOptions);
-  SwaggerModule.setup(
-    process.env.API_SWAGGER_URL as string,
-    app,
-    document
-  );
+  SwaggerModule.setup(process.env.API_SWAGGER_URL as string, app, document);
 
   await app.listen(process.env.API_PORT as string);
 
-  console.log(`API server successfully started on: ${await app.getUrl()}`)
+  console.log(`API server successfully started on: ${await app.getUrl()}`);
 }
 
-bootstrap()
-  .catch((err) => console.error(err.message));
+bootstrap().catch((err) => console.error(err.message));

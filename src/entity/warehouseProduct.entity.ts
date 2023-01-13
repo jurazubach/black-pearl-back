@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { ProductEntity } from './product.entity';
 
 export enum WAREHOUSE_PRODUCT_SIZE {
@@ -17,7 +17,7 @@ export enum WAREHOUSE_PRODUCT_SIZE {
 }
 
 export type TWarehouseProductSize =
-  WAREHOUSE_PRODUCT_SIZE.XS
+  | WAREHOUSE_PRODUCT_SIZE.XS
   | WAREHOUSE_PRODUCT_SIZE.XS_S
   | WAREHOUSE_PRODUCT_SIZE.S
   | WAREHOUSE_PRODUCT_SIZE.S_M
@@ -30,30 +30,30 @@ export type TWarehouseProductSize =
   | WAREHOUSE_PRODUCT_SIZE.XXL
   | WAREHOUSE_PRODUCT_SIZE.XXXL;
 
-@Entity({ name: "warehouse_products" })
+@Entity({ name: 'warehouse_products' })
 export class WarehouseProductEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: false })
+  @Column({ type: 'int', nullable: false })
   productId: number;
 
-  @Column({ type: "int", nullable: false })
+  @Column({ type: 'int', nullable: false })
   quantity: number;
 
-  @Column({ type: "int", nullable: false })
+  @Column({ type: 'int', nullable: false })
   price: number;
 
-  @Column({ type: "int", nullable: false })
+  @Column({ type: 'int', nullable: false })
   oldPrice: number;
 
   @Column({ nullable: false, type: 'enum', enum: WAREHOUSE_PRODUCT_SIZE, default: WAREHOUSE_PRODUCT_SIZE.XS })
   size: TWarehouseProductSize;
 
-  @Column({ type: "datetime", nullable: false, default: () => "CURRENT_TIMESTAMP" })
+  @Column({ type: 'datetime', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   lastUpdatedAt: string;
 
-  @Column({ type: "datetime", nullable: false, default: () => "CURRENT_TIMESTAMP" })
+  @Column({ type: 'datetime', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   createdAt: string;
 
   product: ProductEntity;

@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsOptional, Max, Min, IsNumber } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty, IsOptional, Max, Min, IsNumber } from 'class-validator';
 import { COUPON_DISCOUNT_TYPE, COUPON_TYPE } from '../../entity/coupon.entity';
 
 export class CouponDto {
@@ -24,10 +24,10 @@ export class CouponDto {
   discount?: number;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "2015-05-20 16:05:00" })
+  @ApiProperty({ example: '2015-05-20 16:05:00' })
   startAt: string;
 
   @IsNotEmpty()
-  @ApiProperty({ example: "2015-05-20 16:05:00" })
+  @ApiProperty({ example: '2015-05-20 16:05:00' })
   endAt: string;
 }

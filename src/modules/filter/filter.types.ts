@@ -2,6 +2,7 @@ export interface IFilterModel {
   id: number;
   alias: string;
   title: string;
+  description?: string;
 }
 
 export interface IStateLangModels {

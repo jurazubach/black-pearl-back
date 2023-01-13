@@ -2,53 +2,66 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { CouponEntity } from './coupon.entity';
 
 export enum ORDER_TYPE {
-  OPEN = "open",
-  PROCESSING = "processing",
-  COMPLETED = "completed",
-  CANCELED = "canceled",
-  DELIVERING = "delivering",
-  PAUSE = "pause",
+  OPEN = 'open',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  CANCELED = 'canceled',
+  DELIVERING = 'delivering',
+  PAUSE = 'pause',
+}
+
+export enum ORDER_POST_TYPE {
+  NOVA_POSHTA = 'novaPoshta',
+  UKR_POSHTA = 'urkPoshta',
 }
 
 export enum ORDER_PAYMENT {
-  PAID = "paid",
-  WAITING = "waiting", // оплатили но не дошли
-  UN_PAID = "un_paid",
+  PAID = 'paid',
+  WAITING = 'waiting', // оплатили но не дошли
+  UN_PAID = 'un_paid',
 }
 
-@Entity({ name: "orders" })
+@Entity({ name: 'orders' })
 export class OrderEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", nullable: false })
+  @Column({ type: 'varchar', nullable: false })
   email: string;
 
-  @Column({ type: "varchar", nullable: false })
+  @Column({ type: 'varchar', nullable: false })
   firstName: string;
 
-  @Column({ type: "varchar", nullable: false })
+  @Column({ type: 'varchar', nullable: false })
   lastName: string;
 
-  @Column({ type: "varchar", nullable: false })
-  city: string;
-
-  @Column({ type: "varchar", nullable: false })
-  region: string;
-
-  @Column({ type: "varchar", nullable: false })
-  address: string;
-
-  @Column({ type: "varchar", nullable: false })
-  flat: string;
-
-  @Column({ type: "varchar", nullable: false })
+  @Column({ type: 'varchar', nullable: false })
   phone: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: 'varchar', nullable: false })
+  city: string;
+
+  @Column({ type: 'varchar', nullable: false })
+  region: string;
+
+  @Column({
+    nullable: true,
+    type: 'enum',
+    enum: ORDER_POST_TYPE,
+    default: null,
+  })
+  postType: ORDER_POST_TYPE;
+
+  @Column({ type: 'varchar', nullable: false })
+  postNumber: string;
+
+  @Column({ type: 'varchar', nullable: false })
+  postOrderNumber: string;
+
+  @Column({ type: 'int', nullable: true })
   couponId: number | null;
 
-  @Column({ type: "boolean", nullable: false, default: false })
+  @Column({ type: 'boolean', nullable: false, default: false })
   approved: boolean;
 
   @Column({
@@ -68,9 +81,9 @@ export class OrderEntity {
   payment: ORDER_PAYMENT;
 
   @Column({
-    type: "datetime",
+    type: 'datetime',
     nullable: false,
-    default: () => "CURRENT_TIMESTAMP",
+    default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: string;
 

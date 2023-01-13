@@ -1,9 +1,9 @@
-import { Repository } from "typeorm";
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { UserEntity } from "../../entity/user.entity";
-import {AUTHORIZATION_TYPE, AuthorizationEntity} from "../../entity/authorization.entity";
-import { AuthService } from "../auth/auth.service";
+import { Repository } from 'typeorm';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from '../../entity/user.entity';
+import { AUTHORIZATION_TYPE, AuthorizationEntity } from '../../entity/authorization.entity';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -12,64 +12,39 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(AuthorizationEntity)
     private readonly authorizationRepository: Repository<AuthorizationEntity>,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {}
 
-  async getSecureUserByParams(where: {
-    [key: string]: any;
-  }): Promise<UserEntity> {
+  async getSecureUserByParams(where: { [key: string]: any }): Promise<UserEntity> {
     const user = await this.userRepository
       .createQueryBuilder()
       .where(where)
-      .select([
-        "id",
-        "email",
-        "firstName",
-        "lastName",
-        "role",
-        "lang",
-        "isActive",
-        "isVerify",
-      ])
+      .select(['id', 'email', 'firstName', 'lastName', 'role', 'lang', 'isActive', 'isVerify'])
       .getRawOne<UserEntity>();
 
-    if (!user) throw new HttpException("User not found", HttpStatus.NOT_FOUND);
-    if (!user.isVerify)
-      throw new HttpException("User not verified", HttpStatus.UNAUTHORIZED);
-    if (!user.isActive)
-      throw new HttpException("User is deactivated", HttpStatus.FORBIDDEN);
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    if (!user.isVerify) throw new HttpException('User not verified', HttpStatus.UNAUTHORIZED);
+    if (!user.isActive) throw new HttpException('User is deactivated', HttpStatus.FORBIDDEN);
 
     return user;
   }
 
   async getUserByParams(where: { [key: string]: any }): Promise<UserEntity> {
-    const user = await this.userRepository
-      .createQueryBuilder()
-      .where(where)
-      .select("*")
-      .getRawOne<UserEntity>();
+    const user = await this.userRepository.createQueryBuilder().where(where).select('*').getRawOne<UserEntity>();
 
-    if (!user) throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
     return user;
   }
 
   async isUserExistByParams(where: { [key: string]: any }) {
-    const user = await this.userRepository
-      .createQueryBuilder()
-      .where(where)
-      .select("id")
-      .getRawOne();
+    const user = await this.userRepository.createQueryBuilder().where(where).select('id').getRawOne();
 
     return !!user;
   }
 
   async updateUser(id: number, data: any) {
-    return this.userRepository
-      .createQueryBuilder()
-      .update(data)
-      .where("id = :id", { id })
-      .execute();
+    return this.userRepository.createQueryBuilder().update(data).where('id = :id', { id }).execute();
   }
 
   async createUser(user: UserEntity) {
@@ -86,7 +61,7 @@ export class UserService {
       return this.getSecureUserByParams({ id: row.userId });
     }
 
-    throw new HttpException("Invalid token", HttpStatus.BAD_REQUEST);
+    throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
   }
 
   async setAuthToken({

@@ -1,42 +1,25 @@
-import { EntityManager } from "typeorm";
-import get from "lodash/get";
-import { Injectable } from "@nestjs/common";
-import { I18nService } from "nestjs-i18n";
-import { InjectEntityManager } from "@nestjs/typeorm";
-import { IFilters } from "src/decorators/filters.decorators";
-import { LISTEN_FILTERS } from "src/constants/filters";
-import map from "lodash/map";
-import { CategoryEntity } from "src/entity/category.entity";
-import { USER_LANGUAGE } from "src/entity/user.entity";
-import { TYPE_ENTITIES, DELETE_CONDITION } from "./filter.constants";
-import {
-  IFilterState,
-  IFilterModel,
-  IFilterModels,
-  IStateLangModels,
-} from "./filter.types";
-import { PropertyEntity } from '../../entity/property.entity';
-import { PropertyValueEntity } from '../../entity/propertyValue.entity';
-import { CollectionEntity } from '../../entity/collection.entity';
+import { EntityManager } from 'typeorm';
+import get from 'lodash/get';
+import { Injectable } from '@nestjs/common';
+import { InjectEntityManager } from '@nestjs/typeorm';
+import { IFilters } from 'src/decorators/filters.decorators';
+import { LISTEN_FILTERS } from 'src/constants/filters';
+import { CategoryEntity } from 'src/entity/category.entity';
+import { IFilterState, IFilterModel, IFilterModels, IStateLangModels } from './filter.types';
+import { PropertyEntity } from 'src/entity/property.entity';
+import { PropertyValueEntity } from 'src/entity/propertyValue.entity';
+import { CollectionEntity } from 'src/entity/collection.entity';
 
 @Injectable()
 export class FilterService {
   private state: IFilterState = {};
 
-  constructor(
-    @InjectEntityManager() private readonly entityManager: EntityManager,
-    private readonly i18n: I18nService
-  ) {
+  constructor(@InjectEntityManager() private readonly entityManager: EntityManager) {
     this.loadState();
   }
 
   private async loadState() {
-    const [
-      categories,
-      collections,
-      properties,
-      propertyValues,
-    ] = await Promise.all([
+    const [categories, collections, properties, propertyValues] = await Promise.all([
       this.getCategories(),
       this.getCollections(),
       this.getProperties(),
@@ -51,87 +34,72 @@ export class FilterService {
     });
   }
 
-  private async translateModels(
-    rootPath: string,
-    models: any[]
-  ): Promise<IStateLangModels> {
+  private async getCategories() {
     const accumulator: IStateLangModels = { uk: [], en: [] };
 
-    for await (const model of models) {
-      const path = `${rootPath}.${model.alias}`;
-      const [uk, en] = await Promise.all([
-        this.i18n.t(path, { lang: USER_LANGUAGE.UK }),
-        this.i18n.t(path, { lang: USER_LANGUAGE.EN }),
-      ]);
+    const categories = await this.entityManager
+      .createQueryBuilder(CategoryEntity, 'c')
+      .select('c.id, c.alias, c.title, c.description')
+      .getRawMany<CategoryEntity>();
 
-      accumulator.uk.push({ ...model, ...uk });
-      accumulator.en.push({ ...model, ...en });
+    for await (const category of categories) {
+      accumulator.uk.push({ id: category.id, alias: category.alias, title: category.singleTitle, description: category.description });
     }
 
     return accumulator;
-  }
-
-  private async getCategories() {
-    const categories = await this.entityManager
-      .createQueryBuilder(CategoryEntity, "c")
-      .select("c.id, c.alias")
-      .getRawMany<CategoryEntity>();
-
-    return this.translateModels("categories", categories);
   }
 
   private async getCollections() {
     const accumulator: IStateLangModels = { uk: [], en: [] };
 
     const collections = await this.entityManager
-      .createQueryBuilder(CollectionEntity, "c")
-      .select(`c.id, c.alias, c.titleUk, c.titleEn`)
+      .createQueryBuilder(CollectionEntity, 'c')
+      .select(`c.id, c.alias, c.title, c.description`)
       .getRawMany<CollectionEntity>();
 
     for await (const collection of collections) {
-      accumulator.uk.push({ id: collection.id, alias: collection.alias, title: collection.titleUk });
-      accumulator.en.push({ id: collection.id, alias: collection.alias, title: collection.titleUk });
+      accumulator.uk.push({ id: collection.id, alias: collection.alias, title: collection.title, description: collection.description });
     }
 
     return accumulator;
   }
 
   private async getProperties() {
+    const accumulator: IStateLangModels = { uk: [], en: [] };
+
     const properties = await this.entityManager
-      .createQueryBuilder(PropertyEntity, "p")
-      .select("p.id, p.alias")
+      .createQueryBuilder(PropertyEntity, 'p')
+      .select('p.id, p.alias, p.title')
       .getRawMany<PropertyEntity>();
 
-    return this.translateModels("properties", properties);
+    for await (const property of properties) {
+      accumulator.uk.push({ id: property.id, alias: property.alias, title: property.title });
+    }
+
+    return accumulator;
   }
 
   private async getPropertyValues() {
+    const accumulator: IStateLangModels = { uk: [], en: [] };
+
     const propertyValues = await this.entityManager
-      .createQueryBuilder(PropertyValueEntity, "pv")
-      .select("pv.id, pv.alias")
+      .createQueryBuilder(PropertyValueEntity, 'pv')
+      .select('pv.id, pv.alias, pv.title')
       .getRawMany<PropertyValueEntity>();
 
-    return this.translateModels("propertyValues", propertyValues);
+    for await (const propertyValue of propertyValues) {
+      accumulator.uk.push({ id: propertyValue.id, alias: propertyValue.alias, title: propertyValue.title });
+    }
+
+    return accumulator;
   }
 
   private getState(filterName: string, lang: string): any[] {
-    return (get(
-      this.state,
-      `${filterName}.${lang}`,
-      []
-    ) as unknown) as IFilterModel[];
+    return get(this.state, `${filterName}.${lang}`, []) as unknown as IFilterModel[];
   }
 
-  private getStateByFilter(
-    filterName: string,
-    filterValues: string[],
-    lang: string
-  ): any[] {
-    const models = (get(
-      this.state,
-      `${filterName}.${lang}`,
-      []
-    ) as unknown) as IFilterModel[];
+  private getStateByFilter(filterName: string, filterValues: string[], lang: string): any[] {
+    const models = get(this.state, `${filterName}.${lang}`, []) as unknown as IFilterModel[];
 
     return models.filter((model) => filterValues.includes(model.alias));
   }
@@ -161,60 +129,5 @@ export class FilterService {
     });
 
     return models;
-  }
-
-  async deleteRelative(type: string, entity: any, relCondition: any) {
-    return this.entityManager
-      .createQueryBuilder()
-      .delete()
-      .from(entity)
-      .where(DELETE_CONDITION[type], relCondition)
-      .execute();
-  }
-
-  async insertRelative(entity: any, values: any[]) {
-    return this.entityManager
-      .createQueryBuilder()
-      .insert()
-      .into(entity)
-      .values(values)
-      .execute();
-  }
-
-  async setFilterCategories(
-    type: string,
-    categoryIds: number[],
-    relCondition: any
-  ) {
-    const entity = TYPE_ENTITIES[type][LISTEN_FILTERS.CATEGORIES];
-    await this.deleteRelative(type, entity, relCondition);
-
-    const values = categoryIds.map((categoryId) => ({
-      ...relCondition,
-      categoryId,
-    }));
-
-    return this.insertRelative(entity, values);
-  }
-
-  async setFilterRelatives(
-    type: string,
-    filters: IFilterModels,
-    relCondition: any
-  ) {
-    const filterEntries = Object.entries(filters);
-    const insertPromises = [];
-
-    for await (const [filterKey, filterValues] of filterEntries) {
-      const filterIds = map(filterValues, "id");
-
-      if (filterKey === LISTEN_FILTERS.CATEGORIES) {
-        insertPromises.push(
-          this.setFilterCategories(type, filterIds, relCondition)
-        );
-      }
-    }
-
-    return Promise.all(insertPromises);
   }
 }

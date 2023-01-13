@@ -15,12 +15,6 @@ export const users = [
     isActive: 1,
   },
   {
-    id: 5,
-    firstName: 'Simple',
-    lastName: 'Admin',
-    email: 'customber@gmail.com',
-  },
-  {
     id: 2,
     firstName: 'Simple',
     lastName: 'User',
@@ -36,52 +30,70 @@ export const users = [
 ];
 
 export const collections = [
-  { 'alias': 'nezaleshna' },
-  { 'alias': 'tony-soprano' },
+  { alias: 'nezaleshna', title: 'Незалежна', description: 'Описание' },
+  { alias: 'tony-soprano', title: 'Тони сопрано', description: 'Описание' },
 ];
 
 export const properties = [
-  { 'id': 1, 'alias': 'color' },
-  { 'id': 2, 'alias': 'size' },
-  { 'id': 3, 'alias': 'composition' },
+  { id: 1, alias: 'color', title: 'Колір' },
+  { id: 2, alias: 'size', title: 'Розмір' },
+  { id: 3, alias: 'composition', title: 'Склад' },
 ];
 
 export const propertyValues = [
-  { propertyId: 1, 'alias': 'white' },
-  { propertyId: 1, 'alias': 'black' },
-  { propertyId: 1, 'alias': 'red' },
-  { propertyId: 3, 'alias': 'cotton' },
+  { propertyId: 1, alias: 'white', title: 'Білий' },
+  { propertyId: 1, alias: 'black', title: 'Чорний' },
+  { propertyId: 1, alias: 'red', title: 'Червоний' },
+  { propertyId: 3, alias: 'cotton', title: 'Бавовна' },
 ];
 
 export const categories = [
   {
-    'id': 1024,
-    'alias': 'cardigans',
-    'isActive': 1,
+    id: 1024,
+    alias: 'cardigans',
+    singleTitle: 'Джемпер',
+    multipleTitle: 'Джемпери',
+    description: 'Джемпер',
+    isActive: 1,
   },
   {
-    'id': 1074,
-    'alias': 'pullovers',
-    'isActive': 1,
+    id: 1074,
+    alias: 'pullovers',
+    singleTitle: 'Светр',
+    multipleTitle: 'Светри',
+    description: 'Светр',
+    isActive: 1,
   },
   {
-    'id': 1165,
-    'alias': 'hoodies',
-    'isActive': 1,
+    id: 1165,
+    alias: 'hoodies',
+    singleTitle: 'Толстовка з капюшоном',
+    multipleTitle: 'Толстовки з капюшоном',
+    description: 'Толстовка з капюшоном',
+    isActive: 1,
   },
   {
-    'id': 1187,
-    'alias': 't-shorts',
-    'isActive': 1,
+    id: 1187,
+    alias: 't-shorts',
+    singleTitle: 'Футболка',
+    multipleTitle: 'Футболки',
+    description: 'Футболка',
+    isActive: 1,
   },
   {
-    'id': 1231,
-    'alias': 'shorts',
-    'isActive': 1,
+    id: 1231,
+    alias: 'shorts',
+    singleTitle: 'Шорти',
+    multipleTitle: 'Шорти',
+    description: 'Шорти',
+    isActive: 1,
   },
   {
-    'id': 1246,
-    'alias': 'pants',
-    'isActive': 1,
+    id: 1246,
+    alias: 'pants',
+    singleTitle: 'Штани',
+    multipleTitle: 'Штани',
+    description: 'Штани',
+    isActive: 1,
   },
 ];

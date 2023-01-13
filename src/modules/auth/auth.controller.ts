@@ -1,51 +1,41 @@
-import {
-  Controller,
-  Post,
-  Body,
-  HttpCode,
-  Res,
-  HttpStatus,
-} from "@nestjs/common";
-import { Response } from "express";
-import { HttpException } from "@nestjs/common";
-import { LoginDTO, RegisterDTO } from "./auth.dto";
-import { UserService } from "../user/user.service";
-import { AuthService } from "./auth.service";
-import { UserEntity, USER_ROLE } from "../../entity/user.entity";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
-import { ConfigService } from "@nestjs/config";
-import { AUTHORIZATION_TYPE } from "../../entity/authorization.entity";
-import { MailService } from "../mail/mail.service";
-import { UrlService } from "../url/url.service";
+import { Controller, Post, Body, HttpCode, Res, HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
+import { HttpException } from '@nestjs/common';
+import { LoginDTO, RegisterDTO } from './auth.dto';
+import { UserService } from '../user/user.service';
+import { AuthService } from './auth.service';
+import { UserEntity, USER_ROLE } from '../../entity/user.entity';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
+import { AUTHORIZATION_TYPE } from '../../entity/authorization.entity';
+import { MailService } from '../mail/mail.service';
+import { UrlService } from '../url/url.service';
 
-@ApiTags("Auth")
-@Controller("auth")
+@ApiTags('Auth')
+@Controller('auth')
 export class AuthController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
-    private readonly urlService: UrlService
+    private readonly urlService: UrlService,
   ) {}
 
-  @Post("sign-in")
-  @ApiOperation({ summary: "Авторизация пользователя" })
+  @Post('sign-in')
+  @ApiOperation({ summary: 'Авторизация пользователя' })
   @HttpCode(HttpStatus.OK)
-  async signIn(
-    @Body() payload: LoginDTO,
-    @Res({ passthrough: true }) res: Response
-  ) {
+  async signIn(@Body() payload: LoginDTO, @Res({ passthrough: true }) res: Response) {
     const user = await this.userService.getUserByParams({
       email: payload.email,
     });
 
     if (!user.isActive) {
-      throw new HttpException("User is deactivated", HttpStatus.FORBIDDEN);
+      throw new HttpException('User is deactivated', HttpStatus.FORBIDDEN);
     }
 
     if (!this.authService.isPasswordValid(payload.password, user)) {
-      throw new HttpException("Incorrect password", HttpStatus.FORBIDDEN);
+      throw new HttpException('Incorrect password', HttpStatus.FORBIDDEN);
     }
 
     const token = await this.authService.generateJwt({ user });
@@ -55,22 +45,19 @@ export class AuthController {
     return { data: token };
   }
 
-  @Post("sign-up")
-  @ApiOperation({ summary: "Регистрация нового пользователя" })
+  @Post('sign-up')
+  @ApiOperation({ summary: 'Регистрация нового пользователя' })
   @HttpCode(HttpStatus.CREATED)
   async signUp(@Body() payload: RegisterDTO) {
     const isUserExist = await this.userService.isUserExistByParams({
       email: payload.email,
     });
     if (isUserExist) {
-      throw new HttpException("User already exists", HttpStatus.BAD_REQUEST);
+      throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
     }
 
     const generatedSalt = this.authService.generateRandomSalt();
-    const hashedPassword = this.authService.generatePasswordHash(
-      payload.password,
-      generatedSalt
-    );
+    const hashedPassword = this.authService.generatePasswordHash(payload.password, generatedSalt);
 
     const userEntity = new UserEntity();
     Object.assign(userEntity, {

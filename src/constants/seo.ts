@@ -8,7 +8,7 @@ export const MAX_MULTIPLE_FILTER_INDEXING = 2;
 export const MAX_FILTER_INDEXING = 2;
 
 export const ROBOT_TYPES = {
-    INDEX_FOLLOW: "index, follow",
-    NOINDEX_FOLLOW: "noindex, follow",
-    NOINDEX_NOFOLLOW: "noindex, nofollow",
+  INDEX_FOLLOW: 'index, follow',
+  NOINDEX_FOLLOW: 'noindex, follow',
+  NOINDEX_NOFOLLOW: 'noindex, nofollow',
 };

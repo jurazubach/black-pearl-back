@@ -11,11 +11,7 @@ import { TSortPage } from '../../constants/sorting';
 @ApiTags('Catalog')
 @Controller('catalog')
 export class CatalogController {
-  constructor(
-    private readonly catalogService: CatalogService,
-    private readonly filterService: FilterService
-  ) {
-  }
+  constructor(private readonly catalogService: CatalogService, private readonly filterService: FilterService) {}
 
   @Get('home')
   @ApiOperation({ summary: 'Возвращает список продуктов для домашней страницы' })
@@ -27,7 +23,7 @@ export class CatalogController {
     @I18nLang() lang: string,
   ) {
     const filterModels = this.filterService.getFilterModels(filters, lang);
-    const products = await this.catalogService.getProductsForMain(filterModels, pagination, sort, lang);
+    const products = await this.catalogService.getProductsForMain(filterModels, pagination, sort);
 
     // TODO: благодаря тому что есть фильтра можно сразу сгенерить и отдать meta seo
 
@@ -44,7 +40,7 @@ export class CatalogController {
     @I18nLang() lang: string,
   ) {
     const filterModels = this.filterService.getFilterModels(filters, lang);
-    const products = await this.catalogService.getProductsForCatalog(filterModels, pagination, sort, lang);
+    const products = await this.catalogService.getProductsForCatalog(filterModels, pagination, sort);
 
     // TODO: благодаря тому что есть фильтра можно сразу сгенерить и отдать meta seo
 

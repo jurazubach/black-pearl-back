@@ -1,34 +1,21 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { IPagination, Pagination } from '../../decorators/pagination.decorators';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { I18nLang } from 'nestjs-i18n';
 
 @ApiTags('Orders')
 @Controller('orders')
 export class OrderController {
-  constructor(
-    private readonly orderService: OrderService,
-  ) {
-  }
+  constructor(private readonly orderService: OrderService) {}
 
   @Get()
   @ApiOperation({ summary: 'Возвращает список заказов' })
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
-  async getOrderList(@Pagination() pagination: IPagination, @I18nLang() lang: string) {
-    const orders = await this.orderService.getOrderList(pagination, lang);
+  async getOrderList(@Pagination() pagination: IPagination) {
+    const orders = await this.orderService.getOrderList(pagination);
 
     return { data: orders };
   }
@@ -38,8 +25,8 @@ export class OrderController {
   @ApiOperation({ summary: 'Возвращает расширенную информацию по конкретному заказу' })
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
-  async getOrder(@Param('id') id: number, @I18nLang() lang: string) {
-    const order = await this.orderService.getOrderByParams({ id }, lang);
+  async getOrder(@Param('id') id: number) {
+    const order = await this.orderService.getOrderByParams({ id });
 
     return { data: order };
   }
@@ -49,8 +36,8 @@ export class OrderController {
   @ApiBearerAuth('token')
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
-  async createOrder(@Body() payload: CreateOrderDto, @I18nLang() lang: string) {
-    const order = await this.orderService.createOrder(payload, lang);
+  async createOrder(@Body() payload: CreateOrderDto) {
+    const order = await this.orderService.createOrder(payload);
 
     return { data: order };
   }

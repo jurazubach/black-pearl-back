@@ -14,14 +14,13 @@ export class CollectionService {
     @InjectRepository(CollectionEntity)
     private readonly collectionRepository: Repository<CollectionEntity>,
     private readonly i18n: I18nService,
-    private readonly configService: ConfigService
-  ) {
-  }
+    private readonly configService: ConfigService,
+  ) {}
 
-  async getCollection(alias: string, lang: string) {
+  async getCollection(alias: string) {
     const collection = await this.collectionRepository
       .createQueryBuilder('c')
-      .select(`c.id, c.alias, c.title${lang} as title, c.description${lang} as description`)
+      .select(`c.id, c.alias, c.title, c.description`)
       .where('c.alias = :alias', { alias })
       .getRawOne<CollectionEntity>();
 
@@ -42,10 +41,10 @@ export class CollectionService {
   async getCollectionImages(collectionAlias: string) {
     const paths: string[] = [];
 
-    const protocol = this.configService.get<string>("API_PROTOCOL");
-    const host = this.configService.get<string>("API_HOST");
-    const port = this.configService.get<string>("API_PORT");
-    const portPart = port ? `:${port}` : "";
+    const protocol = this.configService.get<string>('API_PROTOCOL');
+    const host = this.configService.get<string>('API_HOST');
+    const port = this.configService.get<string>('API_PORT');
+    const portPart = port ? `:${port}` : '';
     const hostname = `${protocol}://${host}${portPart}/images/collections/${collectionAlias}`;
 
     const files = glob.sync(`src/public/images/collections/${collectionAlias}/*`, { realpath: true });
@@ -57,10 +56,10 @@ export class CollectionService {
     return paths;
   }
 
-  async getCollectionList(pagination: IPagination, lang: string) {
+  async getCollectionList(pagination: IPagination) {
     const collections = await this.collectionRepository
       .createQueryBuilder('c')
-      .select(`c.id, c.alias, c.title${lang} as title, c.description${lang} as description`)
+      .select(`c.id, c.alias, c.title, c.description`)
       .limit(pagination.limit)
       .offset(pagination.offset)
       .getRawMany<CollectionEntity>();
