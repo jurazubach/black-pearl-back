@@ -72,6 +72,9 @@ export class CustomerService {
   }
 
   async deleteCustomerById(id: number) {
+    const isCustomerExist = await this.isCustomerExistByParams({ id });
+    if (!isCustomerExist) throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+
     return this.customerRepository.delete({ id });
   }
 

@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, ManyToOne } from 'typeorm';
 import { CategoryEntity } from './category.entity';
 
 @Entity({ name: 'products' })
@@ -6,8 +6,16 @@ export class ProductEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ManyToOne(() => CategoryEntity, (category) => category.id, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
+  category: CategoryEntity;
+
   @Column({ type: 'int', nullable: false })
-  categoryId: string;
+  categoryId: number;
 
   @Column({ type: 'varchar', unique: true, nullable: false })
   alias: string;
@@ -16,14 +24,8 @@ export class ProductEntity {
   isActive: boolean;
 
   @Column({ type: 'varchar', nullable: false })
-  singleTitle: string;
-
-  @Column({ type: 'varchar', nullable: false })
-  multipleTitle: string;
+  title: string;
 
   @Column({ type: 'varchar', nullable: false })
   description: string;
-
-  images: string[];
-  category: CategoryEntity;
 }

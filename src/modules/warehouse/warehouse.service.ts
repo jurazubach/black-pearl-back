@@ -5,7 +5,6 @@ import { ProductEntity } from 'src/entity/product.entity';
 import { TWarehouseProductSize, WarehouseProductEntity } from 'src/entity/warehouseProduct.entity';
 import _round from 'lodash/round';
 import { SimilarProductEntity } from 'src/entity/similarProduct.entity';
-import { ProductService } from '../product/product.service';
 
 @Injectable()
 export class WarehouseService {
@@ -15,8 +14,7 @@ export class WarehouseService {
     @InjectRepository(WarehouseProductEntity)
     private readonly warehouseProductRepository: Repository<WarehouseProductEntity>,
     @InjectRepository(SimilarProductEntity)
-    private readonly similarProductRepository: Repository<SimilarProductEntity>,
-    private readonly productService: ProductService,
+    private readonly similarProductRepository: Repository<SimilarProductEntity>
   ) {}
 
   async getPureProduct(alias: string) {
@@ -44,19 +42,11 @@ export class WarehouseService {
   async getSimilarProducts(productId: number) {
     const similarProducts = await this.productRepository
       .createQueryBuilder('p')
-      .select(`p.id, p.alias, p.singleTitle, p.multipleTitle`)
+      .select(`p.id, p.alias, p.title, p.description`)
       .innerJoin(SimilarProductEntity, 'sp', 'sp.similarProductId = p.id')
       .where('sp.productId = :productId AND p.isActive = 1', { productId })
       .groupBy('p.id')
-      .getRawMany<ProductEntity>()
-      .then(async (products) => {
-        for await (const product of products) {
-          const images = await this.productService.getProductImages(product.alias);
-          Object.assign(product, { images });
-        }
-
-        return products;
-      });
+      .getRawMany<ProductEntity>();
 
     const goodsProductsEntities = await Promise.all(
       similarProducts.map(({ id }) => {

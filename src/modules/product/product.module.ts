@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ProductController } from './product.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CategoryEntity } from '../../entity/category.entity';
@@ -30,4 +30,5 @@ import { SimilarProductEntity } from 'src/entity/similarProduct.entity';
   controllers: [ProductController],
   exports: [ProductService],
 })
-export class ProductModule {}
+export class ProductModule {
+}

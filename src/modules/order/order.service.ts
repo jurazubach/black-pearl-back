@@ -92,15 +92,14 @@ export class OrderService {
           .createQueryBuilder('op')
           .select(
             `op.id as orderProductId,
-            op.oldPrice,
             op.price,
             op.quantity,
             op.size,
             JSON_OBJECT(
               'id', p.id,
               'alias', p.alias,
-              'singleTitle', p.singleTitle,
-              'multipleTitle', p.multipleTitle
+              'title', p.title,
+              'description', p.description
             ) as product
             `,
           )
@@ -108,14 +107,7 @@ export class OrderService {
           .innerJoin(ProductEntity, 'p', 'p.id = op.productId')
           .where('op.orderId = :orderId', { orderId: id })
           .getRawMany<OrderProductEntity>()
-          .then(async (orderProducts) => {
-            for await (const product of orderProducts) {
-              const images = await this.productService.getProductImages(product.product.alias);
-              Object.assign(product.product, { images });
-            }
-
-            return { orderId: id, products: orderProducts };
-          });
+          .then(async (orderProducts) => ({ orderId: id, products: orderProducts }));
       }),
     );
 

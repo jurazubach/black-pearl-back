@@ -44,8 +44,7 @@ export class CatalogService {
       .select(
         `
         p.id, p.alias,
-        p.singleTitle,
-        p.multipleTitle,
+        p.title,
         p.description,
         JSON_OBJECT('id', cat.id, 'alias', cat.alias) as category
         `,
@@ -89,14 +88,7 @@ export class CatalogService {
       );
     }
 
-    const products = await queryBuilder.getRawMany<ProductEntity>().then(async (productEntities) => {
-      for await (const product of productEntities) {
-        const images = await this.productService.getProductImages(product.alias);
-        Object.assign(product, { images });
-      }
-
-      return productEntities;
-    });
+    const products = await queryBuilder.getRawMany<ProductEntity>();
 
     const productIds = products.map(({ id }) => id);
     const similarProductEntities = await Promise.all(

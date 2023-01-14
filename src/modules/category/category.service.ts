@@ -16,7 +16,7 @@ export class CategoryService {
     const category = await this.categoryRepository
       .createQueryBuilder('c')
       .where('c.alias = :alias AND c.isActive = 1', { alias })
-      .select(`c.id, c.alias, c.title, c.description`)
+      .select(`c.id, c.alias, c.singleTitle, c.description`)
       .getRawOne<CategoryEntity>();
 
     if (!category) {

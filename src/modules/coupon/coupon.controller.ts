@@ -25,7 +25,7 @@ export class CouponController {
   @ApiOperation({ summary: 'Возвращает расширенную информацию по конкретному купону' })
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
-  async getCustomer(@Param('id') id: number) {
+  async getCoupon(@Param('id') id: number) {
     const coupon = await this.couponService.getCouponByParams({ id });
 
     return { data: coupon };
@@ -36,7 +36,7 @@ export class CouponController {
   @ApiOperation({ summary: 'Возвращает список заказов по конкретному купону' })
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
-  async getCustomerOrders(@Param('id') id: number, @Pagination() pagination: IPagination) {
+  async getCouponOrders(@Param('id') id: number, @Pagination() pagination: IPagination) {
     const coupon = await this.couponService.getCouponByParams({ id });
     const orders = await this.couponService.getCouponOrders(coupon, pagination);
 
@@ -70,7 +70,7 @@ export class CouponController {
   @ApiBearerAuth('token')
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
-  async deleteCustomer(@Param('id') id: number) {
+  async deleteCoupon(@Param('id') id: number) {
     const couponEntity = await this.couponService.getCouponByParams({ id });
     await this.couponService.deleteCoupon(couponEntity);
 

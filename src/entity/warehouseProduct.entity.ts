@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { ProductEntity } from './product.entity';
 
 export enum WAREHOUSE_PRODUCT_SIZE {
@@ -35,6 +35,10 @@ export class WarehouseProductEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ManyToOne(() => ProductEntity, (product) => product.id, { cascade: true, onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
+  product: ProductEntity;
+
   @Column({ type: 'int', nullable: false })
   productId: number;
 
@@ -55,6 +59,4 @@ export class WarehouseProductEntity {
 
   @Column({ type: 'datetime', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   createdAt: string;
-
-  product: ProductEntity;
 }

@@ -1,21 +1,17 @@
 import { Repository } from 'typeorm';
-import { I18nService } from 'nestjs-i18n';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import _capitalize from 'lodash/capitalize';
-import glob from 'glob';
 import { CategoryEntity } from '../../entity/category.entity';
 import { ProductEntity } from '../../entity/product.entity';
 import { CollectionEntity } from '../../entity/collection.entity';
 import { ProductPropertyEntity } from '../../entity/productProperty.entity';
 import { PropertyEntity } from '../../entity/property.entity';
 import { PropertyValueEntity } from '../../entity/propertyValue.entity';
-import { ConfigService } from '@nestjs/config';
-import _last from 'lodash/last';
 import { CollectionProductEntity } from '../../entity/collectionProduct.entity';
-import { IProductProperty, IPropertyWithValue } from './product.helper';
+import { IPropertyWithValue } from './product.helper';
 import { WarehouseProductEntity } from '../../entity/warehouseProduct.entity';
 import { SimilarProductEntity } from '../../entity/similarProduct.entity';
+import { IPagination } from '../../decorators/pagination.decorators';
 
 @Injectable()
 export class ProductService {
@@ -28,9 +24,8 @@ export class ProductService {
     private readonly productPropertyRepository: Repository<ProductPropertyEntity>,
     @InjectRepository(WarehouseProductEntity)
     private readonly warehouseProductRepository: Repository<WarehouseProductEntity>,
-    private readonly i18n: I18nService,
-    private readonly configService: ConfigService,
-  ) {}
+  ) {
+  }
 
   async getPureProduct(where: { [key: string]: any }) {
     const product = await this.productRepository
@@ -49,19 +44,11 @@ export class ProductService {
   async getSimilarProducts(productId: number) {
     const similarProducts = await this.productRepository
       .createQueryBuilder('p')
-      .select(`p.id, p.alias, p.singleTitle, p.multipleTitle`)
+      .select(`p.id, p.alias, p.title, p.description`)
       .innerJoin(SimilarProductEntity, 'sp', 'sp.similarProductId = p.id')
       .where('sp.productId = :productId AND p.isActive = 1', { productId })
       .groupBy('p.id')
-      .getRawMany<ProductEntity>()
-      .then(async (products) => {
-        for await (const product of products) {
-          const images = await this.getProductImages(product.alias);
-          Object.assign(product, { images });
-        }
-
-        return products;
-      });
+      .getRawMany<ProductEntity>();
 
     const goodsProductsEntities = await Promise.all(
       similarProducts.map(({ id }) => {
@@ -84,19 +71,49 @@ export class ProductService {
     return similarProducts;
   }
 
-  async getProduct(where: { [key: string]: any }) {
+  async getProductList(pagination: IPagination) {
+    return this.productRepository
+      .createQueryBuilder('p')
+      .select(
+        `
+        p.id,
+        p.alias,
+        p.title,
+        p.description,
+        p.isActive,
+        JSON_OBJECT(
+          'id', c.id,
+          'alias', c.alias,
+          'singleTitle', c.singleTitle,
+          'multipleTitle', c.multipleTitle,
+          'description', c.description
+        ) as category
+        `,
+      )
+      .innerJoin(CategoryEntity, 'c', 'c.id = p.categoryId')
+      .limit(pagination.limit)
+      .offset(pagination.offset)
+      .getRawMany<ProductEntity>();
+  }
+
+  async getPublicProduct(alias: string) {
     const product = await this.productRepository
       .createQueryBuilder('p')
       .select(
         `
         p.id, p.alias,
-        p.singleTitle,
-        p.multipleTitle,
+        p.title,
         p.description,
-        JSON_OBJECT('id', c.id, 'alias', c.alias, 'title', c.title, 'description', c.description) as category
+        JSON_OBJECT(
+          'id', c.id,
+          'alias', c.alias,
+          'singleTitle', c.singleTitle,
+          'multipleTitle', c.multipleTitle,
+          'description', c.description
+        ) as category
         `,
       )
-      .where('p.alias = :alias AND p.isActive = 1', where)
+      .where(`p.alias = :alias AND p.isActive = 1`, { alias })
       .innerJoin(CategoryEntity, 'c', 'c.id = p.categoryId')
       .getRawOne<ProductEntity>();
 
@@ -105,7 +122,6 @@ export class ProductService {
     }
 
     const properties = await this.getProductProperties(product['id']);
-    const images = await this.getProductImages(product['alias']);
     const collection = await this.getProductCollection(product['id']);
 
     const goods = await this.warehouseProductRepository
@@ -120,46 +136,45 @@ export class ProductService {
       ...product,
       collection,
       properties,
-      images,
       goods,
       similarProducts,
     };
   }
 
-  async getProductImages(productAlias: string) {
-    const paths: string[] = [];
+  async getProduct(id: number) {
+    const product = await this.productRepository
+      .createQueryBuilder('p')
+      .select(
+        `
+        p.id,
+        p.alias,
+        p.title,
+        p.description,
+        JSON_OBJECT(
+          'id', c.id,
+          'alias', c.alias,
+          'singleTitle', c.singleTitle,
+          'multipleTitle', c.multipleTitle,
+          'description', c.description
+        ) as category
+        `,
+      )
+      .where(`p.id = :id`, { id })
+      .innerJoin(CategoryEntity, 'c', 'c.id = p.categoryId')
+      .getRawOne<ProductEntity>();
 
-    const protocol = this.configService.get<string>('API_PROTOCOL');
-    const host = this.configService.get<string>('API_HOST');
-    const port = this.configService.get<string>('API_PORT');
-    const portPart = port ? `:${port}` : '';
-    const hostname = `${protocol}://${host}${portPart}/images/products/${productAlias}`;
-
-    const files = glob.sync(`src/public/images/products/${productAlias}/*`, { realpath: true });
-    for await (const filePath of files) {
-      const image = _last(filePath.split('/'));
-      paths.push(`${hostname}/${image}`);
+    if (!product) {
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
     }
 
-    return paths;
-  }
+    const properties = await this.getProductProperties(product['id']);
+    const similarProducts = await this.getSimilarProducts(product['id']);
 
-  async getCollectionImages(collectionAlias: string) {
-    const paths: string[] = [];
-
-    const protocol = this.configService.get<string>('API_PROTOCOL');
-    const host = this.configService.get<string>('API_HOST');
-    const port = this.configService.get<string>('API_PORT');
-    const portPart = port ? `:${port}` : '';
-    const hostname = `${protocol}://${host}${portPart}/images/collections/${collectionAlias}`;
-
-    const files = glob.sync(`src/public/images/collections/${collectionAlias}/*`, { realpath: true });
-    for await (const filePath of files) {
-      const image = _last(filePath.split('/'));
-      paths.push(`${hostname}/${image}`);
-    }
-
-    return paths;
+    return {
+      ...product,
+      properties,
+      similarProducts,
+    };
   }
 
   async getProductCollection(productId: number) {
@@ -172,9 +187,6 @@ export class ProductService {
     if (!collection) {
       return null;
     }
-
-    const collectionImages = await this.getCollectionImages(collection.alias);
-    Object.assign(collection, { images: collectionImages });
 
     return collection;
   }

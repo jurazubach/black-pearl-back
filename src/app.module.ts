@@ -16,6 +16,7 @@ import { CustomerModule } from './modules/customer/customer.module';
 import { OrderModule } from './modules/order/order.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
+import { ImageModule } from './modules/image/image.module';
 import { getMysqlConfig } from 'src/configs/mysql.config';
 import { getIntlConfig } from 'src/configs/intl.config';
 import { getStaticConfig } from 'src/configs/static.config';
@@ -49,6 +50,7 @@ import { getStaticConfig } from 'src/configs/static.config';
     CouponModule,
     CatalogModule,
     SeoModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

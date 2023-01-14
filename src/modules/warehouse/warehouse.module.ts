@@ -7,7 +7,6 @@ import { WarehouseProductEntity } from '../../entity/warehouseProduct.entity';
 import { PropertyValueEntity } from '../../entity/propertyValue.entity';
 import { PropertyEntity } from '../../entity/property.entity';
 import { SimilarProductEntity } from 'src/entity/similarProduct.entity';
-import { ProductModule } from '../product/product.module';
 import { CategoryEntity } from '../../entity/category.entity';
 import { CollectionEntity } from '../../entity/collection.entity';
 import { CollectionProductEntity } from '../../entity/collectionProduct.entity';
@@ -26,7 +25,6 @@ import { ProductPropertyEntity } from '../../entity/productProperty.entity';
       PropertyValueEntity,
       PropertyEntity,
     ]),
-    ProductModule,
   ],
   providers: [WarehouseService],
   controllers: [WarehouseController],

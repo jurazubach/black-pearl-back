@@ -14,11 +14,12 @@ export class PromotionEntity {
   @Column({ type: 'varchar', nullable: false })
   description: string;
 
+  @Column({ type: 'boolean', default: false })
+  isActive: boolean;
+
   @Column({ type: 'datetime', nullable: false })
   startAt: string;
 
   @Column({ type: 'datetime', nullable: false })
   endAt: string;
-
-  images: string[];
 }

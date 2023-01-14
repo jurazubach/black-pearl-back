@@ -5,7 +5,7 @@ export class CollectionEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', unique: true, nullable: false })
   alias: string;
 
   @Column({ type: 'varchar', nullable: false })
@@ -14,5 +14,6 @@ export class CollectionEntity {
   @Column({ type: 'varchar', nullable: false })
   description: string;
 
-  images: string[];
+  @Column({ type: 'boolean', default: false })
+  isActive: boolean;
 }

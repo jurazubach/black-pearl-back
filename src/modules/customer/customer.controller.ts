@@ -94,9 +94,6 @@ export class CustomerController {
   @AuthGuard()
   @HttpCode(HttpStatus.OK)
   async deleteCustomer(@Param('id') id: number) {
-    const isCustomerExist = await this.customerService.isCustomerExistByParams({ id });
-    if (!isCustomerExist) throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
-
     await this.customerService.deleteCustomerById(id);
 
     return { data: { status: true } };

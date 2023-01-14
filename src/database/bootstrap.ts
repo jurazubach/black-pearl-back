@@ -1,12 +1,34 @@
 import { createConnection, Connection } from 'typeorm';
 import * as config from '../../ormconfig';
 
-import { users, categories, properties, propertyValues, collections } from './seeds';
+import {
+  users,
+  categories,
+  properties,
+  propertyValues,
+  collections,
+  collectionProducts,
+  productProperties,
+  products,
+  orderProducts,
+  orders,
+  coupons,
+  similarProducts,
+  warehouseProducts,
+} from './seeds';
 import { CategoryEntity } from '../entity/category.entity';
 import { UserEntity } from '../entity/user.entity';
 import { PropertyEntity } from '../entity/property.entity';
 import { PropertyValueEntity } from '../entity/propertyValue.entity';
 import { CollectionEntity } from '../entity/collection.entity';
+import { ProductEntity } from '../entity/product.entity';
+import { ProductPropertyEntity } from '../entity/productProperty.entity';
+import { OrderProductEntity } from '../entity/orderProduct.entity';
+import { CouponEntity } from '../entity/coupon.entity';
+import { SimilarProductEntity } from '../entity/similarProduct.entity';
+import { OrderEntity } from '../entity/order.entity';
+import { CollectionProductEntity } from '../entity/collectionProduct.entity';
+import { WarehouseProductEntity } from '../entity/warehouseProduct.entity';
 
 const insertToTable = async (connection: Connection, entity: any, data: any) => {
   try {
@@ -23,7 +45,18 @@ const runBootstrap = async () => {
   await insertToTable(connection, UserEntity, users);
   await insertToTable(connection, PropertyEntity, properties);
   await insertToTable(connection, PropertyValueEntity, propertyValues);
+  await insertToTable(connection, CouponEntity, coupons);
+
+  await insertToTable(connection, ProductEntity, products);
+  await insertToTable(connection, ProductPropertyEntity, productProperties);
+  await insertToTable(connection, SimilarProductEntity, similarProducts);
+  await insertToTable(connection, WarehouseProductEntity, warehouseProducts);
+
+  await insertToTable(connection, OrderEntity, orders);
+  await insertToTable(connection, OrderProductEntity, orderProducts);
+
   await insertToTable(connection, CollectionEntity, collections);
+  await insertToTable(connection, CollectionProductEntity, collectionProducts);
 };
 
 runBootstrap()

@@ -1,69 +1,153 @@
 import { Repository } from 'typeorm';
-import { I18nService } from 'nestjs-i18n';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import glob from 'glob';
 import { CollectionEntity } from '../../entity/collection.entity';
-import { ConfigService } from '@nestjs/config';
-import _last from 'lodash/last';
 import { IPagination } from '../../decorators/pagination.decorators';
+import { CollectionDto } from './collection.dto';
+import { CollectionProductEntity } from '../../entity/collectionProduct.entity';
+import { ProductEntity } from '../../entity/product.entity';
 
 @Injectable()
 export class CollectionService {
   constructor(
     @InjectRepository(CollectionEntity)
     private readonly collectionRepository: Repository<CollectionEntity>,
-    private readonly i18n: I18nService,
-    private readonly configService: ConfigService,
-  ) {}
+    @InjectRepository(CollectionProductEntity)
+    private readonly collectionProductRepository: Repository<CollectionProductEntity>,
+    @InjectRepository(ProductEntity)
+    private readonly productRepository: Repository<ProductEntity>,
+  ) {
+  }
 
-  async getCollection(alias: string) {
+  async getPublicCollectionByAlias(alias: string) {
     const collection = await this.collectionRepository
       .createQueryBuilder('c')
-      .select(`c.id, c.alias, c.title, c.description`)
-      .where('c.alias = :alias', { alias })
+      .select(`c.id, c.alias, c.title, c.description, c.isActive`)
+      .where('c.alias = :alias AND c.isActive = 1', { alias })
       .getRawOne<CollectionEntity>();
 
     if (!collection) {
       throw new HttpException('Collection not found', HttpStatus.NOT_FOUND);
     }
 
-    return this.wrapCollection(collection);
-  }
+    const products = await this.productRepository
+      .createQueryBuilder('p')
+      .select(`p.id, p.alias, p.title`)
+      .innerJoin(CollectionProductEntity, 'cp', 'cp.productId = p.id')
+      .where('cp.collectionId = :collectionId AND p.isActive = 1', { collectionId: collection.id })
+      .groupBy('p.id')
+      .getRawMany<ProductEntity>();
 
-  async wrapCollection(collection: CollectionEntity) {
-    const images = await this.getCollectionImages(collection.alias);
-    Object.assign(collection, { images });
+    Object.assign(collection, { products });
 
     return collection;
   }
 
-  async getCollectionImages(collectionAlias: string) {
-    const paths: string[] = [];
+  async getCollectionByID(id: number) {
+    const collection = await this.collectionRepository
+      .createQueryBuilder('c')
+      .select(`c.id, c.alias, c.title, c.description, c.isActive`)
+      .where('c.id = :id', { id })
+      .getRawOne<CollectionEntity>();
 
-    const protocol = this.configService.get<string>('API_PROTOCOL');
-    const host = this.configService.get<string>('API_HOST');
-    const port = this.configService.get<string>('API_PORT');
-    const portPart = port ? `:${port}` : '';
-    const hostname = `${protocol}://${host}${portPart}/images/collections/${collectionAlias}`;
-
-    const files = glob.sync(`src/public/images/collections/${collectionAlias}/*`, { realpath: true });
-    for await (const filePath of files) {
-      const image = _last(filePath.split('/'));
-      paths.push(`${hostname}/${image}`);
+    if (!collection) {
+      throw new HttpException('Collection not found', HttpStatus.NOT_FOUND);
     }
 
-    return paths;
+    const products = await this.productRepository
+      .createQueryBuilder('p')
+      .select(`p.id, p.alias, p.title`)
+      .innerJoin(CollectionProductEntity, 'cp', 'cp.productId = p.id')
+      .where('cp.collectionId = :collectionId', { collectionId: collection.id })
+      .groupBy('p.id')
+      .getRawMany<ProductEntity>();
+
+    Object.assign(collection, { products });
+
+    return collection;
   }
 
   async getCollectionList(pagination: IPagination) {
-    const collections = await this.collectionRepository
+    return this.collectionRepository
       .createQueryBuilder('c')
-      .select(`c.id, c.alias, c.title, c.description`)
+      .select(`c.id, c.alias, c.title, c.description, c.isActive, COUNT(cp.id) as countProducts`)
+      .leftJoin(CollectionProductEntity, 'cp', 'cp.collectionId = c.id')
       .limit(pagination.limit)
       .offset(pagination.offset)
+      .groupBy('c.id')
       .getRawMany<CollectionEntity>();
+  }
 
-    return Promise.all(collections.map((collection) => this.wrapCollection(collection)));
+  async createCollection(payload: CollectionDto) {
+    const collectionEntity = new CollectionEntity();
+    Object.assign(collectionEntity, {
+      alias: payload.alias,
+      title: payload.title,
+      description: payload.description,
+      isActive: payload.isActive,
+    });
+
+    const collection = await this.collectionRepository.save(collectionEntity);
+
+    const collectionProducts = payload.productIds.map((productId) => {
+      const collectionProductEntity = new CollectionProductEntity();
+      Object.assign(collectionProductEntity, { collectionId: collection.id, productId });
+
+      return collectionProductEntity;
+    });
+
+    await this.collectionProductRepository.save(collectionProducts);
+
+    return collection;
+  }
+
+  async updateCollection(id: number, payload: CollectionDto) {
+    const collection = await this.collectionRepository
+      .createQueryBuilder('c')
+      .where({ id })
+      .select('*')
+      .getRawOne<CollectionEntity>();
+
+    if (!collection) throw new HttpException('Collection not found', HttpStatus.NOT_FOUND);
+
+    Object.assign(collection, {
+      alias: payload.alias,
+      title: payload.title,
+      description: payload.description,
+      isActive: payload.isActive,
+    });
+
+    await this.collectionRepository
+      .createQueryBuilder()
+      .update(collection)
+      .where('id = :id', { id })
+      .execute();
+
+    await this.collectionProductRepository.delete({ collectionId: collection.id });
+
+    const collectionProducts = payload.productIds.map((productId) => {
+      const collectionProductEntity = new CollectionProductEntity();
+      Object.assign(collectionProductEntity, { collectionId: collection.id, productId });
+
+      return collectionProductEntity;
+    });
+
+    await this.collectionProductRepository.save(collectionProducts);
+
+    return collection;
+  }
+
+  async deleteCollection(id: number) {
+    const collection = await this.collectionRepository
+      .createQueryBuilder('c')
+      .where({ id })
+      .select('id')
+      .getRawOne<CollectionEntity>();
+
+    if (!collection) throw new HttpException('Collection not found', HttpStatus.NOT_FOUND);
+
+    await this.collectionProductRepository.delete({ collectionId: collection.id });
+
+    return this.collectionRepository.delete({ id: collection.id });
   }
 }

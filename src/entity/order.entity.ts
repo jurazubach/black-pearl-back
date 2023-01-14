@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { CouponEntity } from './coupon.entity';
 
 export enum ORDER_TYPE {
@@ -52,11 +52,19 @@ export class OrderEntity {
   })
   postType: ORDER_POST_TYPE;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true })
   postNumber: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true })
   postOrderNumber: string;
+
+  @ManyToOne(() => CouponEntity, (coupon) => coupon.id, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'couponId', referencedColumnName: 'id' })
+  coupon: CouponEntity | null;
 
   @Column({ type: 'int', nullable: true })
   couponId: number | null;
@@ -86,6 +94,4 @@ export class OrderEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: string;
-
-  coupon: CouponEntity | null;
 }

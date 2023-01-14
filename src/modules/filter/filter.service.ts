@@ -39,7 +39,7 @@ export class FilterService {
 
     const categories = await this.entityManager
       .createQueryBuilder(CategoryEntity, 'c')
-      .select('c.id, c.alias, c.title, c.description')
+      .select('c.id, c.alias, c.singleTitle, c.description')
       .getRawMany<CategoryEntity>();
 
     for await (const category of categories) {

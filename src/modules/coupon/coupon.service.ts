@@ -17,7 +17,8 @@ export class CouponService {
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
     private readonly orderService: OrderService,
-  ) {}
+  ) {
+  }
 
   async getCouponByParams(where: { [key: string]: any }, select: string = '*'): Promise<CouponEntity> {
     const coupon = await this.couponRepository.createQueryBuilder('c').where(where).select(select).getRawOne<CouponEntity>();
@@ -30,20 +31,7 @@ export class CouponService {
   async getCouponOrders(coupon: CouponEntity, pagination: IPagination): Promise<object[]> {
     const ordersWithCoupons = await this.orderRepository
       .createQueryBuilder('o')
-      .select(
-        `
-        o.*,
-        JSON_OBJECT(
-          'id', c.id,
-          'type', c.type,
-          'code', c.code,
-          'discountType', c.discountType,
-          'discount', c.discount,
-          'startAt', c.startAt,
-          'endAt', c.endAt
-        ) as coupon
-      `,
-      )
+      .select(`o.*`)
       .innerJoin(CouponEntity, 'c', 'c.id = o.couponId')
       .limit(pagination.limit)
       .offset(pagination.offset)
@@ -89,8 +77,9 @@ export class CouponService {
       .where('o.couponId = :couponId', { couponId: coupon.id })
       .getRawOne<OrderEntity>();
 
-    if (!!hasOrderWithCoupons)
+    if (!!hasOrderWithCoupons) {
       throw new HttpException('Coupon can not be deleted, because coupon used', HttpStatus.BAD_REQUEST);
+    }
 
     return this.couponRepository.delete({ id: coupon.id });
   }
@@ -98,9 +87,11 @@ export class CouponService {
   async getCouponList(pagination: IPagination) {
     return await this.couponRepository
       .createQueryBuilder('c')
-      .select(`*`)
+      .select(`c.*, COUNT(o.id) as used`)
+      .leftJoin('orders', 'o', 'c.id = o.couponId')
       .limit(pagination.limit)
       .offset(pagination.offset)
+      .groupBy('c.id')
       .getRawMany<CouponEntity>();
   }
 }
