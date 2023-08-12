@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { CouponEntity } from './coupon.entity';
 
-export enum ORDER_TYPE {
+export enum EOrderType {
   OPEN = 'open',
   PROCESSING = 'processing',
   COMPLETED = 'completed',
@@ -10,15 +10,20 @@ export enum ORDER_TYPE {
   PAUSE = 'pause',
 }
 
-export enum ORDER_POST_TYPE {
+export enum EOrderPostType {
   NOVA_POSHTA = 'novaPoshta',
-  UKR_POSHTA = 'urkPoshta',
+  UKR_POSHTA = 'ukrPoshta',
 }
 
-export enum ORDER_PAYMENT {
+export enum EOrderPaymentType {
+  CASH = 'cash',
+  CARD = 'card',
+}
+
+export enum EOrderPayment {
   PAID = 'paid',
   WAITING = 'waiting', // оплатили но не дошли
-  UN_PAID = 'un_paid',
+  UN_PAID = 'unPaid',
 }
 
 @Entity({ name: 'orders' })
@@ -45,15 +50,15 @@ export class OrderEntity {
   region: string;
 
   @Column({
-    nullable: true,
+    nullable: false,
     type: 'enum',
-    enum: ORDER_POST_TYPE,
-    default: null,
+    enum: EOrderPostType,
+    default: EOrderPostType.NOVA_POSHTA,
   })
-  postType: ORDER_POST_TYPE;
+  postType: EOrderPostType;
 
-  @Column({ type: 'varchar', nullable: true })
-  postNumber: string;
+  @Column({ type: 'varchar', nullable: false })
+  postAddress: string;
 
   @Column({ type: 'varchar', nullable: true })
   postOrderNumber: string;
@@ -75,18 +80,26 @@ export class OrderEntity {
   @Column({
     nullable: false,
     type: 'enum',
-    enum: ORDER_TYPE,
-    default: ORDER_TYPE.OPEN,
+    enum: EOrderType,
+    default: EOrderType.OPEN,
   })
-  type: ORDER_TYPE;
+  type: EOrderType;
 
   @Column({
     nullable: false,
     type: 'enum',
-    enum: ORDER_PAYMENT,
-    default: ORDER_PAYMENT.UN_PAID,
+    enum: EOrderPaymentType,
+    default: EOrderPaymentType.CASH,
   })
-  payment: ORDER_PAYMENT;
+  paymentType: EOrderPaymentType;
+
+  @Column({
+    nullable: false,
+    type: 'enum',
+    enum: EOrderPayment,
+    default: EOrderPayment.UN_PAID,
+  })
+  payment: EOrderPayment;
 
   @Column({
     type: 'datetime',

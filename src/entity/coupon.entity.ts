@@ -1,11 +1,11 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-export enum COUPON_TYPE {
+export enum ECouponType {
   SINGLE = 'single',
   MULTIPLE = 'multiple',
 }
 
-export enum COUPON_DISCOUNT_TYPE {
+export enum ECouponDiscountType {
   PERCENT = 'percent',
   PRICE = 'price',
 }
@@ -15,14 +15,14 @@ export class CouponEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false, type: 'enum', enum: COUPON_TYPE, default: COUPON_TYPE.SINGLE })
-  type: COUPON_TYPE;
+  @Column({ nullable: false, type: 'enum', enum: ECouponType, default: ECouponType.SINGLE })
+  type: ECouponType;
 
   @Column({ type: 'varchar', nullable: false })
   code: string;
 
-  @Column({ nullable: false, type: 'enum', enum: COUPON_DISCOUNT_TYPE, default: COUPON_DISCOUNT_TYPE.PERCENT })
-  discountType: COUPON_DISCOUNT_TYPE;
+  @Column({ nullable: false, type: 'enum', enum: ECouponDiscountType, default: ECouponDiscountType.PERCENT })
+  discountType: ECouponDiscountType;
 
   @Column({ type: 'int', nullable: true })
   discount: number;
@@ -35,4 +35,6 @@ export class CouponEntity {
 
   @Column({ type: 'datetime', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   endAt: string;
+
+  used?: number;
 }

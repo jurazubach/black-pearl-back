@@ -1,55 +1,30 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import { Controller, Get, Post, HttpCode, HttpStatus, Param, Body } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
-import { IPagination, Pagination } from '../../decorators/pagination.decorators';
-import { CreateOrderDto, UpdateOrderDto } from './order.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { CreateOrderDto } from '../admin/order/order.dto';
 
-@ApiTags('Orders')
-@Controller('orders')
+@ApiTags('Order')
+@Controller('order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
-
-  @Get()
-  @ApiOperation({ summary: 'Возвращает список заказов' })
-  @AuthGuard()
-  @HttpCode(HttpStatus.OK)
-  async getOrderList(@Pagination() pagination: IPagination) {
-    const orders = await this.orderService.getOrderList(pagination);
-
-    return { data: orders };
-  }
-
-  @Get(':id')
-  @ApiParam({ name: 'id', required: true, description: 'ID клиента', example: '1' })
-  @ApiOperation({ summary: 'Возвращает расширенную информацию по конкретному заказу' })
-  @AuthGuard()
-  @HttpCode(HttpStatus.OK)
-  async getOrder(@Param('id') id: number) {
-    const order = await this.orderService.getOrderByParams({ id });
-
-    return { data: order };
-  }
+  constructor(
+    private readonly orderService: OrderService
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Создание нового заказа' })
   @ApiBearerAuth('token')
-  @AuthGuard()
   @HttpCode(HttpStatus.OK)
   async createOrder(@Body() payload: CreateOrderDto) {
-    const order = await this.orderService.createOrder(payload);
+    // const order = await this.orderService.createOrder(payload);
 
-    return { data: order };
+    return { data: {} };
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Обновление данных конкретного заказа' })
-  @ApiBearerAuth('token')
-  @AuthGuard()
+  @Get(':code')
+  @ApiParam({ name: 'code', required: true, description: 'Номер заказа', example: '123456' })
+  @ApiOperation({ summary: 'Возвращает заказ и подробную информацию по продуктах' })
   @HttpCode(HttpStatus.OK)
-  async updateOrder(@Param('id') id: number, @Body() payload: UpdateOrderDto) {
-    await this.orderService.updateOrder(id, payload);
-
-    return { data: { status: true } };
+  async getOrderByCode(@Param('code') code: string) {
+    return { data: [] };
   }
 }

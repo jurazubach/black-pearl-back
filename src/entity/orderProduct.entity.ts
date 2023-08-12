@@ -4,7 +4,7 @@ import { TWarehouseProductSize, WAREHOUSE_PRODUCT_SIZE } from './warehouseProduc
 import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'order_products' })
-@Unique(['productId', 'orderId'])
+@Unique(['productId', 'orderId', 'size'])
 export class OrderProductEntity {
   @PrimaryGeneratedColumn()
   id: number;

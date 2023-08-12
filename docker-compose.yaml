@@ -4,6 +4,6 @@ services:
     image: 'mysql:8.0'
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=horobri
+      - MYSQL_DATABASE=black-pearl
     ports:
       - '37002:3306'

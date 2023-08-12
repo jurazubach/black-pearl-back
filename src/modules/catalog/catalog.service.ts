@@ -2,57 +2,61 @@ import { Repository } from 'typeorm';
 import { I18nService } from 'nestjs-i18n';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CategoryEntity } from '../../entity/category.entity';
-import { ProductEntity } from '../../entity/product.entity';
-import { ProductPropertyEntity } from '../../entity/productProperty.entity';
-import { ConfigService } from '@nestjs/config';
-import { IPagination } from '../../decorators/pagination.decorators';
+import { CategoryEntity } from 'src/entity/category.entity';
+import { ProductEntity } from 'src/entity/product.entity';
+import { ProductPropertyEntity } from 'src/entity/productProperty.entity';
+import { IPagination } from 'src/decorators/pagination.decorators';
+import { ESortPage, TSortPage } from 'src/constants/sorting';
+import { LISTEN_FILTERS } from 'src/constants/filters';
+import { CollectionProductEntity } from 'src/entity/collectionProduct.entity';
+import { CollectionEntity } from 'src/entity/collection.entity';
+import { WarehouseProductEntity } from 'src/entity/warehouseProduct.entity';
 import { IFilterModels } from '../filter/filter.types';
-import { TSortPage } from '../../constants/sorting';
-import { LISTEN_FILTERS } from '../../constants/filters';
-import { CollectionProductEntity } from '../../entity/collectionProduct.entity';
-import { CollectionEntity } from '../../entity/collection.entity';
-import { ProductService } from '../product/product.service';
-import { WarehouseService } from '../warehouse/warehouse.service';
 
 @Injectable()
 export class CatalogService {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
-    @InjectRepository(ProductPropertyEntity)
-    private readonly productPropertyRepository: Repository<ProductPropertyEntity>,
-    private readonly i18n: I18nService,
-    private readonly configService: ConfigService,
-    private readonly productService: ProductService,
-    private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getProductsForMain(filterModels: IFilterModels, pagination: IPagination, sort: TSortPage) {
-    return this.getProductsForCatalog(filterModels, pagination, sort);
-  }
-
-  async getProductsForCatalog(
+  async getProducts(
     filterModels: IFilterModels,
     pagination: IPagination,
     sort: TSortPage,
   ): Promise<ProductEntity[]> {
     // TODO: sort добавіть
 
-    const queryBuilder = await this.productRepository
+    const queryBuilder = this.productRepository
       .createQueryBuilder('p')
       .select(
         `
-        p.id, p.alias,
+        p.id,
+        p.alias,
         p.title,
-        p.description,
-        JSON_OBJECT('id', cat.id, 'alias', cat.alias) as category
+        JSON_OBJECT(
+          'alias', cat.alias,
+          'singleTitle', cat.singleTitle,
+          'multipleTitle', cat.multipleTitle
+        ) as category
         `,
       )
       .where('p.isActive = 1')
       .groupBy('p.id')
+      .innerJoin(WarehouseProductEntity, 'wp', 'wp.productId = p.id')
       .limit(pagination.limit)
       .offset(pagination.offset);
+
+    if (sort === ESortPage.POPULAR) {
+      // TODO: смотреть по кол-во заказаных товаров за последний месяц
+      queryBuilder.orderBy('p.createdAt', 'DESC');
+    } else if (sort === ESortPage.ASC_PRICE) {
+      queryBuilder.orderBy('wp.price', 'ASC');
+    } else if (sort === ESortPage.DESC_PRICE) {
+      queryBuilder.orderBy('wp.price', 'DESC');
+    } else if (sort === ESortPage.NOVELTY) {
+      queryBuilder.orderBy('p.createdAt', 'DESC');
+    }
 
     if (filterModels[LISTEN_FILTERS.CATEGORIES]) {
       const categoryIds = filterModels[LISTEN_FILTERS.CATEGORIES].map(({ id }) => id);
@@ -90,30 +94,6 @@ export class CatalogService {
 
     const products = await queryBuilder.getRawMany<ProductEntity>();
 
-    const productIds = products.map(({ id }) => id);
-    const similarProductEntities = await Promise.all(
-      productIds.map((productId) => {
-        return this.warehouseService
-          .getSimilarProducts(productId)
-          .then((res) => ({ productId, similarProducts: res }));
-      }),
-    );
-
-    const goodsEntities = await Promise.all(
-      productIds.map((productId) => {
-        return this.warehouseService.getProductsGoods(productId).then((res) => ({ productId, goods: res }));
-      }),
-    );
-
-    return products.map((product) => {
-      const matchGoods = goodsEntities.find(({ productId }) => productId === product.id);
-      const matchSimilarProducts = similarProductEntities.find(({ productId }) => productId === product.id);
-
-      return {
-        ...product,
-        goods: matchGoods ? matchGoods.goods : [],
-        similarProducts: matchSimilarProducts ? matchSimilarProducts.similarProducts : [],
-      };
-    });
+    return products;
   }
 }

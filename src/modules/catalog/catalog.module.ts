@@ -9,9 +9,9 @@ import { ProductPropertyEntity } from '../../entity/productProperty.entity';
 import { PropertyValueEntity } from '../../entity/propertyValue.entity';
 import { PropertyEntity } from '../../entity/property.entity';
 import { CollectionProductEntity } from '../../entity/collectionProduct.entity';
-import { ProductModule } from '../product/product.module';
+import { ProductModule } from '../admin/product/product.module';
 import { FilterModule } from '../filter/filter.module';
-import { WarehouseModule } from '../warehouse/warehouse.module';
+import { WarehouseModule } from '../admin/warehouse/warehouse.module';
 
 @Module({
   imports: [

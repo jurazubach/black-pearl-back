@@ -14,6 +14,10 @@ export class ProductEntity {
   @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
   category: CategoryEntity;
 
+  // categoryId + selfId
+  @Column({ type: 'varchar', unique: true, nullable: false })
+  code: string;
+
   @Column({ type: 'int', nullable: false })
   categoryId: number;
 
@@ -26,6 +30,13 @@ export class ProductEntity {
   @Column({ type: 'varchar', nullable: false })
   title: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'text', nullable: false })
   description: string;
+
+  @Column({
+    type: 'datetime',
+    nullable: false,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt: string;
 }

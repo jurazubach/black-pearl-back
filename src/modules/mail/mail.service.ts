@@ -1,7 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { UserEntity } from 'src/entity/user.entity';
-import { ConfigService } from '@nestjs/config';
+import { SubscriptionEntity } from 'src/entity/subscription.entity';
 import { UrlService } from '../url/url.service';
 import { I18nService } from 'nestjs-i18n';
 
@@ -9,13 +9,23 @@ import { I18nService } from 'nestjs-i18n';
 export class MailService {
   constructor(
     private readonly mailerService: MailerService,
-    private readonly configService: ConfigService,
     private readonly urlService: UrlService,
     private readonly i18n: I18nService,
   ) {}
 
   getTemplateName(name: string, locale: string) {
     return `./${name}_${locale}`;
+  }
+
+  async sendUserSubscriptionDiscount(subscriptionUser: SubscriptionEntity, discountCode: string) {
+    const subject = await this.i18n.t('mail.confirmEmail.subject');
+
+    return this.mailerService.sendMail({
+      to: subscriptionUser.email,
+      subject: subject,
+      template: this.getTemplateName('confirm-email', 'uk'),
+      context: { discountCode },
+    });
   }
 
   async sendUserConfirmEmail(user: UserEntity, token: string) {

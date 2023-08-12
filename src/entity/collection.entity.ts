@@ -9,9 +9,12 @@ export class CollectionEntity {
   alias: string;
 
   @Column({ type: 'varchar', nullable: false })
-  title: string;
+  imageSrc: string;
 
   @Column({ type: 'varchar', nullable: false })
+  title: string;
+
+  @Column({ type: 'text', nullable: false })
   description: string;
 
   @Column({ type: 'boolean', default: false })

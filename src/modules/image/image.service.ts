@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { S3 } from 'aws-sdk';
 import { v4 as uuid } from 'uuid';
 import { Express } from 'express';
+import { existsSync, mkdirSync, rmSync } from 'fs';
+import { writeFile } from 'fs/promises';
+import path from 'path';
 
 @Injectable()
 export class ImageService {
@@ -11,11 +14,27 @@ export class ImageService {
   ) {}
 
   async uploadImage(pathToSave: string, files: Array<Express.Multer.File>) {
-    // TODO: тут на вход я получил путь по которому нужно локально сохранить все файлы из массива
+    if (Array.isArray(files) && files.length === 0) {
+      return true;
+    }
+
+    const fullPath = path.join(__dirname, '../../../..', 'public', 'images', pathToSave);
+    if (!existsSync(fullPath)) {
+      mkdirSync(fullPath, { recursive: true });
+    }
+
+    return Promise.all(files.map((file) => {
+      return writeFile(`${fullPath}/${file.originalname}`, file.buffer, 'binary');
+    }));
   }
 
   async removeImages(pathToRemove: string) {
-    // TODO: тут удаляем всё в папке, т.е. например конкретную коллекцию
+    const fullPath = path.join(__dirname, '../../../..', 'public', 'images', pathToRemove);
+    if (existsSync(fullPath)) {
+      rmSync(fullPath, { recursive: true, force: true });
+    }
+
+    return true;
   }
 
   async unzipImages(imagesZip: any) {

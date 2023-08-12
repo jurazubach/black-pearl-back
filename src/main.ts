@@ -19,8 +19,8 @@ async function bootstrap() {
       optionsSuccessStatus: 204,
     },
     httpsOptions: {
-      key: fs.readFileSync(path.resolve('./cert/api.horobri.local-key.pem')),
-      cert: fs.readFileSync(path.resolve('./cert/api.horobri.local.pem')),
+      key: fs.readFileSync(path.resolve('./cert/api.black-pearl.local-key.pem')),
+      cert: fs.readFileSync(path.resolve('./cert/api.black-pearl.local.pem')),
     },
   });
 
@@ -30,14 +30,14 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
-      forbidNonWhitelisted: true,
+      // forbidNonWhitelisted: true,
       disableErrorMessages: process.env.ENV !== 'dev',
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const swaggerOptions = new DocumentBuilder()
-    .setTitle('Horobri')
+    .setTitle('The Black Pearl')
     .setDescription('The API description')
     .setVersion('1.0')
     .build();

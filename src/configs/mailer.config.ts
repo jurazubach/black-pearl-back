@@ -14,7 +14,7 @@ export const getMailerConfig = async (configService: ConfigService): Promise<Mai
     },
   },
   defaults: {
-    from: '"No Reply" <noreply@horobri.in.ua>',
+    from: '"No Reply" <noreply@theblackpearl.com.ua>',
   },
   template: {
     dir: join(__dirname, '../../templates/'),

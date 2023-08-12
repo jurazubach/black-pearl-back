@@ -1,8 +1,10 @@
 dist
 node_modules
 src/historyData/*
-src/tmp/images/*
+public/images/collections/*
+public/images/products/*
+public/images/promotions/*
 .idea
 .env
-horobri-mysql
+black-pearl-mysql
 cert

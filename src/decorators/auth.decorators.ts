@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext, NotImplementedException } from '@nestjs/common';
-import { IJwtToken } from '../modules/auth/auth.interfaces';
+import { IJwtToken } from 'src/modules/admin/auth/auth.interfaces';
 
 export const Auth = createParamDecorator((data: unknown, ctx: ExecutionContext): IJwtToken => {
   const request = ctx.switchToHttp().getRequest();

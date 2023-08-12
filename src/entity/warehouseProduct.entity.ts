@@ -49,6 +49,9 @@ export class WarehouseProductEntity {
   price: number;
 
   @Column({ type: 'int', nullable: false })
+  costPrice: number;
+
+  @Column({ type: 'int', nullable: false })
   oldPrice: number;
 
   @Column({ nullable: false, type: 'enum', enum: WAREHOUSE_PRODUCT_SIZE, default: WAREHOUSE_PRODUCT_SIZE.XS })

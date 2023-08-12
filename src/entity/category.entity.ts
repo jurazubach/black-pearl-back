@@ -17,7 +17,7 @@ export class CategoryEntity {
   @Column({ type: "varchar", nullable: false })
   multipleTitle: string;
 
-  @Column({ type: "varchar", nullable: false })
+  @Column({ type: "text", nullable: false })
   description: string;
 
   images: string[];

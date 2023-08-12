@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ImageService } from './image.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../admin/auth/guards/auth.guard';
 import { Auth } from '../../decorators/auth.decorators';
-import { IJwtToken } from '../auth/auth.interfaces';
+import { IJwtToken } from '../admin/auth/auth.interfaces';
 
 @ApiTags('Images')
 @Controller('images')
