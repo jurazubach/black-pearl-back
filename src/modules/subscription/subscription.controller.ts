@@ -1,7 +1,6 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { HttpException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { MailService } from 'src/modules/mail/mail.service';
 import { SubscriptionDiscountDTO } from './subscription.dto';
 import { SubscriptionService } from './subscription.service';
 
@@ -10,11 +9,10 @@ import { SubscriptionService } from './subscription.service';
 export class SubscriptionController {
   constructor(
     private readonly subscriptionService: SubscriptionService,
-    private readonly mailService: MailService,
   ) {}
 
   @Post('discount')
-  @ApiOperation({ summary: 'Подписаться на рассылку и получить скидку' })
+  @ApiOperation({ summary: 'Subscribe to news and get discount' })
   @HttpCode(HttpStatus.CREATED)
   async discountSubscription(@Body() payload: SubscriptionDiscountDTO) {
     const isUserExist = await this.subscriptionService.isUserExistByParams({ email: payload.email });

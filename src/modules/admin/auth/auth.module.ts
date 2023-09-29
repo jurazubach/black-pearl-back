@@ -5,7 +5,6 @@ import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { AuthService } from './auth.service';
 import { getJwtConfig } from 'src/configs/jwt.config';
-import { MailModule } from '../../mail/mail.module';
 import { UrlModule } from '../../url/url.module';
 
 @Module({
@@ -17,7 +16,6 @@ import { UrlModule } from '../../url/url.module';
       inject: [ConfigService],
       useFactory: getJwtConfig,
     }),
-    MailModule,
     UrlModule,
   ],
   providers: [AuthService],

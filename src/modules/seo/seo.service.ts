@@ -1,31 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { I18nService } from 'nestjs-i18n';
-import { ConfigService } from '@nestjs/config';
+import _round from 'lodash/round';
 import { MAX_FILTER_INDEXING, MAX_MULTIPLE_FILTER_INDEXING } from 'src/constants/seo';
-import { fillPlaceholders, getTemplatePlaceholders, replaceTemplatePlaceholders } from './seo.helpers';
-import { ITemplate, ITemplatePath, IMetaData, IPlaceholders } from './seo.types';
-import { IPagination } from '../../decorators/pagination.decorators';
-import { IFilterModels } from '../filter/filter.types';
+import { IPagination } from 'src/decorators/pagination.decorators';
+import { IFilterModels } from 'src/modules/filter/filter.types';
 import { DEFAULT_PAGE } from 'src/constants/pagination';
+import { ITemplate, ITemplatePath, IMetaData, IPlaceholders } from './seo.types';
+import { fillPlaceholders, getTemplatePlaceholders, replaceTemplatePlaceholders } from './seo.helpers';
 
 interface IMetaTagOptions {
-  lang?: string;
   pagination?: IPagination;
   filterModels?: IFilterModels;
   metaData?: IMetaData;
   noIndex?: boolean;
 }
 
+const i18n = {
+  "default": {
+    "title": "HOROBRI – Головна",
+    "description": "HOROBRI - український бренд одягу, об'єднав в собі  утилітарний, лаконічний і зручний дизайн. Динамічний ритм життя і прагнення до свободи творчих людей надихнув нас створювати самобутний одяг оверсайз.",
+    "keywords": "HOROBRI, horobri, хоробрі, Україна, одяг",
+    "h1": "HOROBRI – Головна"
+  },
+  "dictionary": {
+    "page": "сторінка"
+  },
+};
+
 @Injectable()
 export class SeoService {
-  private readonly defaultLang: string;
-
-  constructor(private readonly i18n: I18nService, private readonly configService: ConfigService) {
-    this.defaultLang = configService.get<string>('defaultLang', 'uk');
-  }
-
   public async getMetaTags(templatePath: ITemplatePath, options: IMetaTagOptions = {}): Promise<ITemplate> {
-    const { lang = this.defaultLang, pagination, filterModels = {}, metaData = {}, noIndex = false } = options;
+    const { pagination, filterModels = { categories: [], properties: [], sizes: [] }, metaData = {}, noIndex = false } = options;
 
     const template = {
       robots: noIndex ? 'noindex, nofollow' : 'index, follow',
@@ -33,15 +37,15 @@ export class SeoService {
     } as ITemplate;
 
     // простые переводы аля "страница, страна тд и тп"
-    const dictionary = await this.i18n.t('seo.dictionary', { lang });
+    const dictionary = i18n.dictionary;
 
     // дефолтные текста для метатегов title, description, keywords, h1
-    const defaultTemplate = await this.i18n.t('seo.default', { lang });
+    const defaultTemplate = i18n.default;
     Object.assign(template, defaultTemplate);
 
     if (templatePath) {
       // тут перезаписываем чем-то что нашли новое
-      const searchTemplate = await this.i18n.t(`seo.${templatePath}`, { lang });
+      const searchTemplate = {};
       if (typeof searchTemplate === 'object') {
         Object.assign(template, searchTemplate);
       }
@@ -58,10 +62,20 @@ export class SeoService {
       dictionary,
     });
 
+    const countApplyFilter = _round(
+      (filterModels.categories.length > 0 ? 1 : 0)
+      + (filterModels.sizes.length > 0 ? 1 : 0)
+      + (filterModels.properties.length > 0 ? 1 : 0), 0);
+
+    const hasMultipleFilters = _round(
+      (filterModels.categories.length >= MAX_MULTIPLE_FILTER_INDEXING ? 1 : 0)
+      + (filterModels.sizes.length >= MAX_MULTIPLE_FILTER_INDEXING ? 1 : 0)
+      + (filterModels.properties.length >= MAX_MULTIPLE_FILTER_INDEXING ? 1 : 0), 0);
+
     const calculateFilters = {
-      hasOneFilter: Object.values(filterModels).length === 1,
-      hasMultipleFilters: Object.values(filterModels).some((values: any) => values.length >= MAX_MULTIPLE_FILTER_INDEXING),
-      hasMoreThatOneFilter: Object.keys(filterModels).length >= MAX_FILTER_INDEXING,
+      hasOneFilter: countApplyFilter === 1,
+      hasMultipleFilters: hasMultipleFilters,
+      hasMoreThatOneFilter: countApplyFilter >= MAX_FILTER_INDEXING,
       hasMoreThatOnePage: pagination ? pagination.page > DEFAULT_PAGE : false,
     };
 

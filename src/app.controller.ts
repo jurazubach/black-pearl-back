@@ -9,7 +9,7 @@ export class AppController {
   constructor(private readonly configService: ConfigService) {}
 
   @Get('version')
-  @ApiOperation({ summary: 'Получение версии API' })
+  @ApiOperation({ summary: 'Get version API' })
   getVersion() {
     return {
       env: this.configService.get('ENV', 'local'),

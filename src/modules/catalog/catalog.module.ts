@@ -1,31 +1,21 @@
 import { Module } from '@nestjs/common';
 import { CatalogController } from './catalog.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CategoryEntity } from '../../entity/category.entity';
-import { CatalogService } from './catalog.service';
-import { ProductEntity } from '../../entity/product.entity';
-import { CollectionEntity } from '../../entity/collection.entity';
-import { ProductPropertyEntity } from '../../entity/productProperty.entity';
-import { PropertyValueEntity } from '../../entity/propertyValue.entity';
-import { PropertyEntity } from '../../entity/property.entity';
-import { CollectionProductEntity } from '../../entity/collectionProduct.entity';
-import { ProductModule } from '../admin/product/product.module';
+import { CategoryEntity } from 'src/entity/category.entity';
+import { ProductEntity } from 'src/entity/product.entity';
+import { ProductPropertyEntity } from 'src/entity/productProperty.entity';
+import { WarehouseProductEntity } from 'src/entity/warehouseProduct.entity';
 import { FilterModule } from '../filter/filter.module';
-import { WarehouseModule } from '../admin/warehouse/warehouse.module';
+import { CatalogService } from './catalog.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       CategoryEntity,
       ProductEntity,
-      CollectionEntity,
-      CollectionProductEntity,
       ProductPropertyEntity,
-      PropertyValueEntity,
-      PropertyEntity,
+      WarehouseProductEntity,
     ]),
-    ProductModule,
-    WarehouseModule,
     FilterModule,
   ],
   providers: [CatalogService],

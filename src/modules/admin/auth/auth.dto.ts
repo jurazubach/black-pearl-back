@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsIn, MinLength } from 'class-validator';
-import { USER_LANGUAGE } from 'src/entity/user.entity';
+import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 
 export class LoginDTO {
   @IsEmail()
@@ -31,11 +30,6 @@ export class RegisterDTO {
   @MinLength(6)
   @ApiProperty({ example: '123456' })
   password: string;
-
-  @IsNotEmpty()
-  @IsIn([USER_LANGUAGE.UK, USER_LANGUAGE.EN])
-  @ApiProperty({ example: USER_LANGUAGE.UK })
-  lang: USER_LANGUAGE = USER_LANGUAGE.UK;
 }
 
 export class RecoverPasswordDTO {

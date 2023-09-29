@@ -1,133 +1,143 @@
 import { EntityManager } from 'typeorm';
-import get from 'lodash/get';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { IFilters } from 'src/decorators/filters.decorators';
 import { LISTEN_FILTERS } from 'src/constants/filters';
 import { CategoryEntity } from 'src/entity/category.entity';
-import { IFilterState, IFilterModel, IFilterModels, IStateLangModels } from './filter.types';
 import { PropertyEntity } from 'src/entity/property.entity';
 import { PropertyValueEntity } from 'src/entity/propertyValue.entity';
-import { CollectionEntity } from 'src/entity/collection.entity';
+import { CACHE_MANAGER, CacheStore } from '@nestjs/cache-manager';
+import { WAREHOUSE_PRODUCT_SIZE } from 'src/entity/warehouseProduct.entity';
+import { IFilterCategory, IFilterModels, IFilterProperty, IFilterSize } from './filter.types';
+
+const ONE_HOUR = 60000 * 60;
 
 @Injectable()
 export class FilterService {
-  private state: IFilterState = {};
-
-  constructor(@InjectEntityManager() private readonly entityManager: EntityManager) {
-    this.loadState();
+  constructor(
+    @InjectEntityManager()
+    private readonly entityManager: EntityManager,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: CacheStore,
+  ) {
   }
 
-  private async loadState() {
-    const [categories, collections, properties, propertyValues] = await Promise.all([
-      this.getCategories(),
-      this.getCollections(),
-      this.getProperties(),
-      this.getPropertyValues(),
-    ]);
+  public async getList(): Promise<IFilterModels> {
+    const filterModels: IFilterModels = {
+      categories: [],
+      sizes: [],
+      properties: [],
+    };
 
-    Object.assign(this.state, {
-      [LISTEN_FILTERS.CATEGORIES]: categories,
-      [LISTEN_FILTERS.COLLECTIONS]: collections,
-      [LISTEN_FILTERS.PROPERTIES]: properties,
-      [LISTEN_FILTERS.PROPERTY_VALUES]: propertyValues,
-    });
+    for await (let filterKey of Object.values(LISTEN_FILTERS)) {
+      if (filterKey === LISTEN_FILTERS.CATEGORIES) {
+        filterModels.categories = await this.getCategoriesModels();
+      } else if (filterKey === LISTEN_FILTERS.SIZE) {
+        filterModels.sizes = await this.getSizesModels();
+      } else {
+        const filterPropertyModel = await this.getPropertyModels(filterKey);
+        if (filterPropertyModel) {
+          filterModels.properties.push(filterPropertyModel)
+        }
+      }
+    }
+
+    return filterModels;
   }
 
-  private async getCategories() {
-    const accumulator: IStateLangModels = { uk: [], en: [] };
+  private async getCategoriesModels() {
+    const categoriesFromCache = await this.cacheManager.get(`filter.${LISTEN_FILTERS.CATEGORIES}`) as IFilterCategory[];
+    if (Array.isArray(categoriesFromCache)) {
+      return categoriesFromCache;
+    }
 
     const categories = await this.entityManager
       .createQueryBuilder(CategoryEntity, 'c')
-      .select('c.id, c.alias, c.singleTitle, c.description')
-      .getRawMany<CategoryEntity>();
+      .select('c.id, c.alias, c.singleTitle AS title')
+      .getRawMany<IFilterCategory>();
 
-    for await (const category of categories) {
-      accumulator.uk.push({ id: category.id, alias: category.alias, title: category.singleTitle, description: category.description });
-    }
+    this.cacheManager.set(`filter.${LISTEN_FILTERS.CATEGORIES}`, categories, { ttl: ONE_HOUR });
 
-    return accumulator;
+    return categories;
   }
 
-  private async getCollections() {
-    const accumulator: IStateLangModels = { uk: [], en: [] };
-
-    const collections = await this.entityManager
-      .createQueryBuilder(CollectionEntity, 'c')
-      .select(`c.id, c.alias, c.title, c.description`)
-      .getRawMany<CollectionEntity>();
-
-    for await (const collection of collections) {
-      accumulator.uk.push({ id: collection.id, alias: collection.alias, title: collection.title, description: collection.description });
+  private async getPropertyModels(propertyAlias: string) {
+    let filterPropertyModel = await this.cacheManager.get(`filter.${propertyAlias}`) as IFilterProperty;
+    if (filterPropertyModel) {
+      return filterPropertyModel;
     }
-
-    return accumulator;
-  }
-
-  private async getProperties() {
-    const accumulator: IStateLangModels = { uk: [], en: [] };
 
     const properties = await this.entityManager
       .createQueryBuilder(PropertyEntity, 'p')
       .select('p.id, p.alias, p.title')
       .getRawMany<PropertyEntity>();
 
-    for await (const property of properties) {
-      accumulator.uk.push({ id: property.id, alias: property.alias, title: property.title });
-    }
-
-    return accumulator;
-  }
-
-  private async getPropertyValues() {
-    const accumulator: IStateLangModels = { uk: [], en: [] };
-
     const propertyValues = await this.entityManager
       .createQueryBuilder(PropertyValueEntity, 'pv')
-      .select('pv.id, pv.alias, pv.title')
+      .select('pv.id, pv.propertyId, pv.alias, pv.title')
       .getRawMany<PropertyValueEntity>();
 
-    for await (const propertyValue of propertyValues) {
-      accumulator.uk.push({ id: propertyValue.id, alias: propertyValue.alias, title: propertyValue.title });
+    properties.forEach((property) => {
+      const filteredPropertyValues = propertyValues.filter((i) => i.propertyId === property.id);
+      const propertyModel = { id: property.id, alias: property.alias, title: property.title, children: filteredPropertyValues };
+
+      this.cacheManager.set(`filter.${property.alias}`, propertyModel, { ttl: ONE_HOUR });
+      filterPropertyModel = propertyModel;
+    });
+
+    return filterPropertyModel;
+  }
+
+  private async getSizesModels() {
+    const sizesFromCache = await this.cacheManager.get(`filter.${LISTEN_FILTERS.SIZE}`) as IFilterSize[];
+    if (Array.isArray(sizesFromCache)) {
+      return sizesFromCache;
     }
 
-    return accumulator;
+    const sizes: IFilterSize[] = Object.values(WAREHOUSE_PRODUCT_SIZE).map((size) => ({ alias: size, title: size }));
+    this.cacheManager.set(`filter.${LISTEN_FILTERS.SIZE}`, sizes, { ttl: ONE_HOUR });
+
+    return sizes;
   }
 
-  private getState(filterName: string, lang: string): any[] {
-    return get(this.state, `${filterName}.${lang}`, []) as unknown as IFilterModel[];
-  }
+  public async getFilterModels(filters: IFilters): Promise<IFilterModels> {
+    const filterModels: IFilterModels = {
+      categories: [],
+      sizes: [],
+      properties: [],
+    };
 
-  private getStateByFilter(filterName: string, filterValues: string[], lang: string): any[] {
-    const models = get(this.state, `${filterName}.${lang}`, []) as unknown as IFilterModel[];
+    for await (let [filterKey, filterValues] of Object.entries(filters)) {
+      if (filterKey === LISTEN_FILTERS.CATEGORIES) {
+        const categoriesModels = await this.getCategoriesModels();
+        const filteredCategories = categoriesModels.filter((i) => filterValues.includes(i.alias));
 
-    return models.filter((model) => filterValues.includes(model.alias));
-  }
+        if (filteredCategories.length > 0) {
+          filterModels.categories = filteredCategories;
+        }
+      } else if (filterKey === LISTEN_FILTERS.SIZE) {
+        const sizesModels = await this.getSizesModels();
+        const filteredSizes = sizesModels.filter((i) => filterValues.includes(i.alias));
 
-  public getList(list: string[], lang: string): IFilterModels {
-    const models = {};
-    const listerKeys = Object.values(LISTEN_FILTERS);
+        if (filteredSizes.length > 0) {
+          filterModels.sizes = filteredSizes;
+        }
+      } else {
+        const filterPropertyModel = await this.getPropertyModels(filterKey);
 
-    list.forEach((listItem) => {
-      if (listerKeys.includes(listItem)) {
-        Object.assign(models, {
-          [listItem]: this.getState(listItem, lang),
-        });
+        if (filterPropertyModel) {
+          const filteredChildrenPropertyValues = filterPropertyModel.children.filter((i) => {
+            return filterValues.includes(i.alias);
+          });
+
+          filterModels.properties.push({
+            ...filterPropertyModel,
+            children: filteredChildrenPropertyValues,
+          });
+        }
       }
-    });
+    }
 
-    return models;
-  }
-
-  public getFilterModels(filters: IFilters, lang: string): IFilterModels {
-    const models = {};
-
-    Object.entries(filters).forEach(([filterKey, filterValues]: any) => {
-      Object.assign(models, {
-        [filterKey]: this.getStateByFilter(filterKey, filterValues, lang),
-      });
-    });
-
-    return models;
+    return filterModels;
   }
 }

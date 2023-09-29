@@ -9,7 +9,7 @@ export class UrlController {
 
   @Get('s/:hash')
   @ApiOperation({
-    summary: 'Декодирует hash и делает редирект по сохранённому URL',
+    summary: 'Decode hash and redirect to URL',
   })
   @HttpCode(HttpStatus.PERMANENT_REDIRECT)
   @Redirect()

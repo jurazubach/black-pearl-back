@@ -1,7 +1,7 @@
 import { Controller, Get, Post, HttpCode, HttpStatus, Param, Body } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
-import { CreateOrderDto } from '../admin/order/order.dto';
+import { CreateOrderDto } from './order.dto';
 
 @ApiTags('Order')
 @Controller('order')
@@ -11,7 +11,7 @@ export class OrderController {
   ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Создание нового заказа' })
+  @ApiOperation({ summary: 'Create new order by customer' })
   @ApiBearerAuth('token')
   @HttpCode(HttpStatus.OK)
   async createOrder(@Body() payload: CreateOrderDto) {
@@ -21,8 +21,8 @@ export class OrderController {
   }
 
   @Get(':code')
-  @ApiParam({ name: 'code', required: true, description: 'Номер заказа', example: '123456' })
-  @ApiOperation({ summary: 'Возвращает заказ и подробную информацию по продуктах' })
+  @ApiParam({ name: 'code', required: true, description: 'Order number', example: '123456' })
+  @ApiOperation({ summary: 'Return full information by order code' })
   @HttpCode(HttpStatus.OK)
   async getOrderByCode(@Param('code') code: string) {
     return { data: [] };

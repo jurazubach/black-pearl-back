@@ -6,10 +6,7 @@ import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { UserEntity, USER_ROLE } from 'src/entity/user.entity';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
 import { AUTHORIZATION_TYPE } from 'src/entity/authorization.entity';
-import { MailService } from '../../mail/mail.service';
-import { UrlService } from '../../url/url.service';
 
 @ApiTags('Admin Auth')
 @Controller('')
@@ -17,9 +14,6 @@ export class AuthController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
-    private readonly mailService: MailService,
-    private readonly urlService: UrlService,
   ) {}
 
   @Post('sign-in')
@@ -66,7 +60,6 @@ export class AuthController {
       email: payload.email,
       password: hashedPassword,
       salt: generatedSalt,
-      lang: payload.lang,
       role: USER_ROLE.USER,
       isActive: true,
     });
@@ -77,7 +70,6 @@ export class AuthController {
       user,
       type: AUTHORIZATION_TYPE.CONFIRM_EMAIL,
     });
-    await this.mailService.sendUserConfirmEmail(user, confirmEmailToken);
 
     return { data: { success: true } };
   }

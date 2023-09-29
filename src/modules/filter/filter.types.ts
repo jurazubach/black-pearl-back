@@ -1,19 +1,30 @@
-export interface IFilterModel {
+export interface IFilterPropertyValue {
+  id: number;
+  propertyId: number;
+  alias: string;
+  title: string;
+}
+
+export interface IFilterProperty {
   id: number;
   alias: string;
   title: string;
-  description?: string;
+  children: IFilterPropertyValue[],
 }
 
-export interface IStateLangModels {
-  en: IFilterModel[];
-  uk: IFilterModel[];
+export interface IFilterCategory {
+  id: number;
+  alias: string;
+  title: string;
 }
 
-export interface IFilterState {
-  [key: string]: IStateLangModels;
+export interface IFilterSize {
+  alias: string;
+  title: string;
 }
 
 export interface IFilterModels {
-  [key: string]: IFilterModel[] | [];
+  categories: IFilterCategory[];
+  sizes: IFilterSize[];
+  properties: IFilterProperty[]
 }

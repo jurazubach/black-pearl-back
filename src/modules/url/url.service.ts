@@ -42,7 +42,7 @@ export class UrlService {
   }
 
   async getShortUrlByHash(hash: string) {
-    const shortUrl: ShortUrlEntity | undefined = await this.shortUrlRepository.findOne({
+    const shortUrl: ShortUrlEntity | null = await this.shortUrlRepository.findOne({
       where: { hash },
     });
 

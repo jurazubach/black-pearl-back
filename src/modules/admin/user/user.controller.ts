@@ -8,7 +8,6 @@ import { ChangePasswordDTO, PutUserDTO } from './user.dto';
 import { AuthService } from '../auth/auth.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IJwtToken } from '../auth/auth.interfaces';
-import { MailService } from '../../mail/mail.service';
 import { Response } from 'express';
 
 @ApiTags('Admin User')
@@ -17,7 +16,6 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
-    private readonly mailService: MailService,
     private readonly configService: ConfigService,
   ) {}
 

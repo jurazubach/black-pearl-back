@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3 } from 'aws-sdk';
-import { v4 as uuid } from 'uuid';
-import { Express } from 'express';
+import { S3 } from '@aws-sdk/client-s3';
+// import { v4 as uuid } from 'uuid';
 import { existsSync, mkdirSync, rmSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
@@ -63,11 +62,11 @@ export class ImageService {
     // тут мы загружаем на s3
     const s3 = new S3();
 
-    const uploadResult = await s3.upload({
-      ACL: 'public-read',
-      Bucket: this.configService.get<string>('AWS_BUCKET_NAME') as string,
-      Body: 'dataBuffer',
-      Key: `${uuid()}-${'fileName'}`,
-    }).promise();
+    // const uploadResult = await s3.upload({
+    //   ACL: 'public-read',
+    //   Bucket: this.configService.get<string>('AWS_BUCKET_NAME') as string,
+    //   Body: 'dataBuffer',
+    //   Key: `${uuid()}-${'fileName'}`,
+    // }).promise();
   }
 }

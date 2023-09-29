@@ -5,7 +5,7 @@ import { httpExceptionHandler } from './handlers/httpExceptionHandler';
 import { jwtExceptionHandler } from './handlers/jwtExceptionHandler';
 
 @Catch(Error)
-class HttpExceptionFilter implements ExceptionFilter {
+export default class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     const responseOptions = {
@@ -38,5 +38,3 @@ class HttpExceptionFilter implements ExceptionFilter {
     });
   }
 }
-
-export { HttpExceptionFilter };

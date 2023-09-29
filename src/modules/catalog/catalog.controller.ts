@@ -1,5 +1,4 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
-import { I18nLang } from 'nestjs-i18n';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Filters, IFilters } from 'src/decorators/filters.decorators';
 import { IPagination, Pagination } from 'src/decorators/pagination.decorators';
@@ -14,8 +13,7 @@ export class CatalogController {
   constructor(
     private readonly catalogService: CatalogService,
     private readonly filterService: FilterService,
-  ) {
-  }
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Return product for catalog' })
@@ -24,12 +22,9 @@ export class CatalogController {
     @Sorting() sort: TSortPage,
     @Pagination() pagination: IPagination,
     @Filters() filters: IFilters,
-    @I18nLang() lang: string,
   ) {
-    const filterModels = this.filterService.getFilterModels(filters, lang);
+    const filterModels = await this.filterService.getFilterModels(filters);
     const products = await this.catalogService.getProducts(filterModels, pagination, sort);
-
-    // TODO: благодаря тому что есть фильтра можно сразу сгенерить и отдать meta seo
 
     return { data: products };
   }

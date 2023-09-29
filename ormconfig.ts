@@ -1,9 +1,11 @@
 import * as dotenv from 'dotenv';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 dotenv.config();
 
-const config: TypeOrmModuleOptions = {
-  type: process.env.DB_DIALECT as 'mysql',
+const connectionSource = new DataSource({
+  name: 'default',
+  migrationsTableName: 'migrations',
+  type: process.env.DB_DIALECT as 'mysql' || 'mysql',
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
   username: process.env.DB_USER,
@@ -20,6 +22,6 @@ const config: TypeOrmModuleOptions = {
     migrationsDir: 'src/database/migration',
     subscribersDir: 'src/database/subscriber',
   },
-};
+} as DataSourceOptions);
 
-module.exports = config;
+export default connectionSource;

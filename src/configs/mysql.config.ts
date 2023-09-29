@@ -2,7 +2,9 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 export const getMysqlConfig = async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
-  type: 'mysql',
+  migrationsTableName: 'migrations',
+  charset: configService.get<string>('DB_CHARSET'),
+  type: configService.get<'mysql'>('DB_DIALECT') || 'mysql',
   host: configService.get<string>('DB_HOST'),
   port: configService.get<number>('DB_PORT'),
   username: configService.get<string>('DB_USER'),

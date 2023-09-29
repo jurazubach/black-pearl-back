@@ -1,5 +1,5 @@
-import { createConnection, Connection } from 'typeorm';
-import * as config from '../../ormconfig';
+import { DataSource } from 'typeorm';
+import * as dataSource from '../../ormconfig';
 
 import {
   users,
@@ -16,21 +16,21 @@ import {
   similarProducts,
   warehouseProducts,
 } from './seeds';
-import { CategoryEntity } from '../entity/category.entity';
-import { UserEntity } from '../entity/user.entity';
-import { PropertyEntity } from '../entity/property.entity';
-import { PropertyValueEntity } from '../entity/propertyValue.entity';
-import { CollectionEntity } from '../entity/collection.entity';
-import { ProductEntity } from '../entity/product.entity';
-import { ProductPropertyEntity } from '../entity/productProperty.entity';
-import { OrderProductEntity } from '../entity/orderProduct.entity';
-import { CouponEntity } from '../entity/coupon.entity';
-import { SimilarProductEntity } from '../entity/similarProduct.entity';
-import { OrderEntity } from '../entity/order.entity';
-import { CollectionProductEntity } from '../entity/collectionProduct.entity';
-import { WarehouseProductEntity } from '../entity/warehouseProduct.entity';
+import { CategoryEntity } from 'src/entity/category.entity';
+import { UserEntity } from 'src/entity/user.entity';
+import { PropertyEntity } from 'src/entity/property.entity';
+import { PropertyValueEntity } from 'src/entity/propertyValue.entity';
+import { CollectionEntity } from 'src/entity/collection.entity';
+import { ProductEntity } from 'src/entity/product.entity';
+import { ProductPropertyEntity } from 'src/entity/productProperty.entity';
+import { OrderProductEntity } from 'src/entity/orderProduct.entity';
+import { CouponEntity } from 'src/entity/coupon.entity';
+import { SimilarProductEntity } from 'src/entity/similarProduct.entity';
+import { OrderEntity } from 'src/entity/order.entity';
+import { CollectionProductEntity } from 'src/entity/collectionProduct.entity';
+import { WarehouseProductEntity } from 'src/entity/warehouseProduct.entity';
 
-const insertToTable = async (connection: Connection, entity: any, data: any) => {
+const insertToTable = async (connection: DataSource, entity: any, data: any) => {
   try {
     await connection.createEntityManager().createQueryBuilder().insert().into(entity).values(data).execute();
   } catch (e) {
@@ -39,7 +39,7 @@ const insertToTable = async (connection: Connection, entity: any, data: any) => 
 };
 
 const runBootstrap = async () => {
-  const connection = await createConnection(config as any);
+  const connection = await dataSource.default.initialize();
 
   await insertToTable(connection, CategoryEntity, categories);
   await insertToTable(connection, UserEntity, users);

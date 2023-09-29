@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsIn, MinLength, MaxLength } from 'class-validator';
-import { USER_LANGUAGE } from 'src/entity/user.entity';
+import { IsEmail, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
 
 export class SendFeedbackDTO {
   @MinLength(3)

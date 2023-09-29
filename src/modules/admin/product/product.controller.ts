@@ -5,7 +5,7 @@ import { IPagination, Pagination } from 'src/decorators/pagination.decorators';
 import { AuthGuard } from '../auth/guards/auth.guard';
 
 @ApiTags('Admin Products')
-@Controller('')
+@Controller()
 export class ProductController {
   constructor(
     private readonly productService: ProductService

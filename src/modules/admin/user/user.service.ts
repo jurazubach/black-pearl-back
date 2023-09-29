@@ -56,7 +56,7 @@ export class UserService {
   }
 
   async getUserByToken(type: AUTHORIZATION_TYPE, token: string) {
-    const row = await this.authorizationRepository.findOne({ type, token });
+    const row = await this.authorizationRepository.findOne({ where: { type, token } });
     if (row && row.userId) {
       return this.getSecureUserByParams({ id: row.userId });
     }

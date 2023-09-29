@@ -1,5 +1,4 @@
-import { IsIn, IsNotEmpty, MinLength, IsOptional } from 'class-validator';
-import { USER_LANGUAGE } from 'src/entity/user.entity';
+import { IsNotEmpty, MinLength, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PutUserDTO {
@@ -12,11 +11,6 @@ export class PutUserDTO {
   @MinLength(3)
   @ApiProperty({ example: 'Ivanov' })
   lastName: string;
-
-  @IsIn([USER_LANGUAGE.UK, USER_LANGUAGE.EN])
-  @IsOptional()
-  @ApiProperty({ example: USER_LANGUAGE.UK })
-  lang: string;
 }
 
 export class ChangePasswordDTO {

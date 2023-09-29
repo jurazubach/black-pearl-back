@@ -5,7 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import { HttpExceptionFilter } from 'src/exceptions/http-exception.filter';
+import HttpExceptionFilter from 'src/exceptions/http-exception.filter';
 import { AppModule } from './app.module';
 
 dotenv.config();

@@ -12,8 +12,8 @@ import {
   END_DELIMITER_REGEX,
   SPACING_REGEX,
 } from 'src/constants/seo';
-import { IFilterModels } from '../filter/filter.types';
 import { LISTEN_FILTERS } from 'src/constants/filters';
+import { IFilterModels } from '../filter/filter.types';
 
 function getTemplatePlaceholders(template: ITemplate): IPlaceholders {
   let templatePlaceHolders: IPlaceholders = [];
@@ -117,12 +117,16 @@ function fillPlaceholders(placeholders: IPlaceholders, options: IFillOptions) {
     }
 
     if (Object.values(LISTEN_FILTERS).includes(filterKey)) {
-      const items = filterModels[filterKey] || [];
-      const itemTitles = items.map(({ title }: any) => title);
+      if (filterKey !== LISTEN_FILTERS.CATEGORIES && filterKey !== LISTEN_FILTERS.SIZE) {
+        const itemFilter = filterModels.properties.find((i) => i.alias === filterKey) || null;
+        if (itemFilter) {
+          const itemTitles = itemFilter.children.map(({ title }: any) => title);
 
-      Object.assign(filledPlaceholders, {
-        [placeholder]: itemTitles.length ? prepareFilterValues(dictionary[filterKey], itemTitles) : '',
-      });
+          Object.assign(filledPlaceholders, {
+            [placeholder]: itemTitles.length ? prepareFilterValues(dictionary[filterKey], itemTitles) : '',
+          });
+        }
+      }
     }
 
     // если есть в мета данных и нету в уже записанном

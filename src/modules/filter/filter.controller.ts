@@ -1,27 +1,20 @@
-import { Controller, Get, Query, HttpCode, HttpStatus } from '@nestjs/common';
-import { I18nLang } from 'nestjs-i18n';
+import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FilterService } from './filter.service';
-import { SeoService } from '../seo/seo.service';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Filter')
 @Controller('filter')
 export class FilterController {
-  constructor(private readonly seoService: SeoService, private readonly filterService: FilterService) {}
+  constructor(
+    private readonly filterService: FilterService,
+    ) {}
 
   @Get('list')
-  @ApiOperation({ summary: 'Возвращает словарь фильтров' })
-  @ApiQuery({
-    name: 'includes',
-    required: true,
-    description: 'Список нужных словарей',
-    example: 'categories,collections',
-  })
+  @ApiOperation({ summary: 'Return filters dictionary' })
   @HttpCode(HttpStatus.OK)
-  async getMetaTags(@Query('includes') includes: string, @I18nLang() lang: string) {
-    const list = includes ? includes.split(',') : [];
-    const models = this.filterService.getList(list, lang);
+  async getMetaTags() {
+    const filterModels = await this.filterService.getList();
 
-    return { data: models };
+    return { data: filterModels };
   }
 }

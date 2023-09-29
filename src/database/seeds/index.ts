@@ -1,4 +1,4 @@
-import { USER_ROLE, USER_LANGUAGE } from '../../entity/user.entity';
+import { USER_ROLE } from '../../entity/user.entity';
 import { WAREHOUSE_PRODUCT_SIZE } from '../../entity/warehouseProduct.entity';
 import { EOrderPayment, EOrderPaymentType, EOrderType } from '../../entity/order.entity';
 
@@ -8,7 +8,6 @@ export const users = [
     firstName: 'Simple',
     lastName: 'Admin',
     email: 'admin@gmail.com',
-    lang: USER_LANGUAGE.UK,
     salt: '4774818f832fcca717c32b30c2d64603',
     // 123456
     password:
@@ -26,7 +25,6 @@ export const users = [
     // 123456
     password:
       '303c41df4ef1c02f551d909d80790c2848f703589d02a8c89e515b032d5f996fa52e0723f20e55d4062119b7c1b627198eb5b789fde849fa3da6a2b39dac21a6',
-    lang: USER_LANGUAGE.UK,
     role: USER_ROLE.USER,
     isVerify: 1,
     isActive: 1,
@@ -36,13 +34,13 @@ export const users = [
 export const properties = [
   { id: 1, alias: 'composition', title: 'Склад' },
   { id: 2, alias: 'material', title: 'Матеріал' },
-  { id: 3, alias: 'sex', title: 'Стать' },
+  { id: 3, alias: 'gender', title: 'Стать' },
   { id: 4, alias: 'season', title: 'Сезон' },
   { id: 5, alias: 'color', title: 'Колір' },
 ];
 
 export const propertyValues = [
-  // sex
+  // gender
   { id: 1, propertyId: properties[2].id, alias: 'men', title: 'Чоловік' },
   { id: 2, propertyId: properties[2].id, alias: 'women', title: 'Жінка' },
   { id: 3, propertyId: properties[2].id, alias: 'girl', title: 'Дівчинка' },

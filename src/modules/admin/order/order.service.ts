@@ -7,7 +7,6 @@ import { CustomerEntity } from 'src/entity/customer.entity';
 import { EOrderPayment, EOrderType, OrderEntity } from 'src/entity/order.entity';
 import { OrderProductEntity } from 'src/entity/orderProduct.entity';
 import { ProductEntity } from 'src/entity/product.entity';
-import { I18nService } from 'nestjs-i18n';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 import { ProductService } from '../product/product.service';
 import { CouponEntity } from 'src/entity/coupon.entity';
@@ -24,7 +23,6 @@ export class OrderService {
     private readonly orderRepository: Repository<OrderEntity>,
     @InjectRepository(OrderProductEntity)
     private readonly orderProductRepository: Repository<OrderProductEntity>,
-    private readonly i18n: I18nService,
     private readonly productService: ProductService,
     private readonly warehouseService: WarehouseService,
     private readonly entityManager: EntityManager,

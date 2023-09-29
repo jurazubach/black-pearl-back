@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { USER_LANGUAGE } from './user.entity';
 
 @Entity({ name: 'subscriptions' })
 export class SubscriptionEntity {

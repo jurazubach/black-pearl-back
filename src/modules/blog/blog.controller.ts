@@ -34,7 +34,7 @@ export class BlogController {
     return { data: articleList };
   }
 
-  @Get('article/:alias')
+  @Get(':alias')
   @ApiParam({ name: 'alias', required: true, description: 'Article alias', example: 'new_year' })
   @ApiOperation({ summary: 'Return full info about article' })
   @HttpCode(HttpStatus.OK)

@@ -1,5 +1,4 @@
 import { Repository } from 'typeorm';
-import { I18nService } from 'nestjs-i18n';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from 'src/entity/category.entity';
@@ -7,17 +6,16 @@ import { ProductEntity } from 'src/entity/product.entity';
 import { ProductPropertyEntity } from 'src/entity/productProperty.entity';
 import { IPagination } from 'src/decorators/pagination.decorators';
 import { ESortPage, TSortPage } from 'src/constants/sorting';
-import { LISTEN_FILTERS } from 'src/constants/filters';
-import { CollectionProductEntity } from 'src/entity/collectionProduct.entity';
-import { CollectionEntity } from 'src/entity/collection.entity';
 import { WarehouseProductEntity } from 'src/entity/warehouseProduct.entity';
-import { IFilterModels } from '../filter/filter.types';
+import { IFilterModels } from 'src/modules/filter/filter.types';
 
 @Injectable()
 export class CatalogService {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
+    @InjectRepository(WarehouseProductEntity)
+    private readonly warehouseProductRepository: Repository<WarehouseProductEntity>,
   ) {}
 
   async getProducts(
@@ -25,25 +23,17 @@ export class CatalogService {
     pagination: IPagination,
     sort: TSortPage,
   ): Promise<ProductEntity[]> {
-    // TODO: sort добавіть
-
     const queryBuilder = this.productRepository
       .createQueryBuilder('p')
       .select(
         `
         p.id,
         p.alias,
-        p.title,
-        JSON_OBJECT(
-          'alias', cat.alias,
-          'singleTitle', cat.singleTitle,
-          'multipleTitle', cat.multipleTitle
-        ) as category
+        p.title
         `,
       )
       .where('p.isActive = 1')
       .groupBy('p.id')
-      .innerJoin(WarehouseProductEntity, 'wp', 'wp.productId = p.id')
       .limit(pagination.limit)
       .offset(pagination.offset);
 
@@ -58,27 +48,40 @@ export class CatalogService {
       queryBuilder.orderBy('p.createdAt', 'DESC');
     }
 
-    if (filterModels[LISTEN_FILTERS.CATEGORIES]) {
-      const categoryIds = filterModels[LISTEN_FILTERS.CATEGORIES].map(({ id }) => id);
-      queryBuilder.innerJoin(CategoryEntity, 'cat', 'cat.id = p.categoryId AND cat.id IN (:categoryIds)', { categoryIds });
+    if (filterModels.categories.length > 0) {
+      const categoryIds = filterModels.categories.map(({ id }) => id);
+
+      queryBuilder.innerJoin(
+        CategoryEntity,
+        'cat',
+        'cat.id = p.categoryId AND cat.id IN (:categoryIds)',
+        { categoryIds },
+      );
     } else {
       queryBuilder.innerJoin(CategoryEntity, 'cat', 'cat.id = p.categoryId');
     }
 
-    if (filterModels[LISTEN_FILTERS.COLLECTIONS]) {
-      const collectionIds = filterModels[LISTEN_FILTERS.COLLECTIONS].map(({ id }) => id);
-      queryBuilder
-        .innerJoin(CollectionEntity, 'col', 'col.id IN (:collectionIds)', { collectionIds })
-        .innerJoin(CollectionProductEntity, 'colProd', 'colProd.collectionId = col.id AND colProd.productId = p.id');
+    if (filterModels.sizes.length > 0) {
+      const sizeAliases = filterModels.sizes.map(({ alias }) => alias);
+
+      queryBuilder.innerJoin(
+        WarehouseProductEntity,
+        'wp',
+        'wp.productId = p.id AND wp.size IN (:sizeAliases)',
+        { sizeAliases },
+      );
+    } else {
+      queryBuilder.innerJoin(WarehouseProductEntity, 'wp', 'wp.productId = p.id')
     }
 
-    if (filterModels[LISTEN_FILTERS.PROPERTIES] || filterModels[LISTEN_FILTERS.PROPERTY_VALUES]) {
-      const propertyIds = filterModels[LISTEN_FILTERS.PROPERTIES]
-        ? filterModels[LISTEN_FILTERS.PROPERTIES].map(({ id }) => id)
-        : [];
-      const propertyValueIds = filterModels[LISTEN_FILTERS.PROPERTY_VALUES]
-        ? filterModels[LISTEN_FILTERS.PROPERTY_VALUES].map(({ id }) => id)
-        : [];
+    if (filterModels.properties.length > 0) {
+      const propertyIds: number[] = [];
+      const propertyValueIds: number[] = []
+
+      filterModels.properties.forEach((filterProperty) => {
+        propertyIds.push(filterProperty.id);
+        propertyValueIds.push(...filterProperty.children.map(({ id }) => id));
+      })
 
       queryBuilder.innerJoin(
         ProductPropertyEntity,
@@ -93,6 +96,20 @@ export class CatalogService {
     }
 
     const products = await queryBuilder.getRawMany<ProductEntity>();
+
+    const warehousePromises = products.map(({ id }, idx) => {
+      return this.warehouseProductRepository
+        .createQueryBuilder('wp')
+        .select(`wp.id, wp.quantity, wp.price, wp.oldPrice, wp.size`)
+        .where('wp.productId = :productId AND wp.quantity > 0', { productId: id })
+        .getRawMany<WarehouseProductEntity>()
+        .then((warehouseProducts) => ({ productIdx: idx, warehouseProducts }));
+    });
+
+    const warehouseProducts = await Promise.all(warehousePromises);
+    warehouseProducts.forEach(({ productIdx, warehouseProducts }) => {
+      Object.assign(products[productIdx], { warehouseProducts });
+    });
 
     return products;
   }
