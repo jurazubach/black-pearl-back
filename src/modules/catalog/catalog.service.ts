@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from 'src/entity/category.entity';
-import { ProductEntity } from 'src/entity/product.entity';
+import { PRODUCT_STATUS, ProductEntity } from 'src/entity/product.entity';
 import { ProductPropertyEntity } from 'src/entity/productProperty.entity';
 import { IPagination } from 'src/decorators/pagination.decorators';
 import { ESortPage, TSortPage } from 'src/constants/sorting';
@@ -32,8 +32,8 @@ export class CatalogService {
         p.title
         `,
       )
-      .where('p.isActive = 1')
-      .groupBy('p.id')
+      .where('p.status = :status', { status: PRODUCT_STATUS.ACTIVE })
+      .groupBy('p.id, wp.id')
       .limit(pagination.limit)
       .offset(pagination.offset);
 

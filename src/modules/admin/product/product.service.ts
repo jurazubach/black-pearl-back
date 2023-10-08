@@ -2,12 +2,10 @@ import { Repository } from 'typeorm';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from 'src/entity/category.entity';
-import { ProductEntity } from 'src/entity/product.entity';
-import { CollectionEntity } from 'src/entity/collection.entity';
+import { PRODUCT_STATUS, ProductEntity } from 'src/entity/product.entity';
 import { ProductPropertyEntity } from 'src/entity/productProperty.entity';
 import { PropertyEntity } from 'src/entity/property.entity';
 import { PropertyValueEntity } from 'src/entity/propertyValue.entity';
-import { CollectionProductEntity } from 'src/entity/collectionProduct.entity';
 import { IPropertyWithValue } from './product.helper';
 import { WarehouseProductEntity } from 'src/entity/warehouseProduct.entity';
 import { SimilarProductEntity } from 'src/entity/similarProduct.entity';
@@ -18,8 +16,6 @@ export class ProductService {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
-    @InjectRepository(CollectionEntity)
-    private readonly collectionRepository: Repository<CollectionEntity>,
     @InjectRepository(ProductPropertyEntity)
     private readonly productPropertyRepository: Repository<ProductPropertyEntity>,
     @InjectRepository(WarehouseProductEntity)
@@ -46,7 +42,7 @@ export class ProductService {
       .createQueryBuilder('p')
       .select(`p.id, p.alias, p.title, p.description`)
       .innerJoin(SimilarProductEntity, 'sp', 'sp.similarProductId = p.id')
-      .where('sp.productId = :productId AND p.isActive = 1', { productId })
+      .where('sp.productId = :productId AND p.status = :status', { productId, status: PRODUCT_STATUS.ACTIVE })
       .groupBy('p.id')
       .getRawMany<ProductEntity>();
 
@@ -88,7 +84,7 @@ export class ProductService {
         p.alias,
         p.title,
         p.description,
-        p.isActive,
+        p.status,
         JSON_OBJECT(
           'id', c.id,
           'alias', c.alias,
@@ -102,21 +98,6 @@ export class ProductService {
       .limit(pagination.limit)
       .offset(pagination.offset)
       .getRawMany<ProductEntity>();
-
-    const collections = await Promise.all(products.map((product) => {
-      return this.getProductCollection(product.id).then((collection) => ({
-        productId: product.id,
-        collection,
-      }));
-    }));
-
-    for await (const product of products) {
-      const matchCollection = collections.find((i) => i.productId === product.id);
-
-      Object.assign(product, {
-        collection: matchCollection ? matchCollection.collection : null,
-      });
-    }
 
     return products;
   }
@@ -140,7 +121,7 @@ export class ProductService {
         ) as category
         `,
       )
-      .where(`p.alias = :alias AND p.isActive = 1`, { alias })
+      .where(`p.alias = :alias AND p.status = :status`, { alias, status: PRODUCT_STATUS.ACTIVE })
       .innerJoin(CategoryEntity, 'c', 'c.id = p.categoryId')
       .getRawOne<ProductEntity>();
 
@@ -149,7 +130,6 @@ export class ProductService {
     }
 
     const properties = await this.getProductProperties(product['id']);
-    const collection = await this.getProductCollection(product['id']);
 
     const goods = await this.warehouseProductRepository
       .createQueryBuilder('wp')
@@ -161,7 +141,6 @@ export class ProductService {
 
     return {
       ...product,
-      collection,
       properties,
       goods,
       similarProducts,
@@ -205,20 +184,6 @@ export class ProductService {
     };
   }
 
-  async getProductCollection(productId: number) {
-    const collection = await this.collectionRepository
-      .createQueryBuilder('c')
-      .select(`c.id, c.alias, c.title, c.description`)
-      .innerJoin(CollectionProductEntity, 'cp', 'cp.productId = :productId', { productId })
-      .getRawOne<CollectionEntity>();
-
-    if (!collection) {
-      return null;
-    }
-
-    return collection;
-  }
-
   async getProductProperties(productId: number) {
     return this.productPropertyRepository
       .createQueryBuilder('pp')
@@ -226,7 +191,7 @@ export class ProductService {
         JSON_OBJECT('id', property.id, 'alias', property.alias, 'title', property.title) as property,
         JSON_OBJECT('id', propertyValue.id, 'alias', propertyValue.alias, 'title', propertyValue.title) as value
       `)
-      .where('product.id = :id AND product.isActive = 1', { id: productId })
+      .where('product.id = :id AND product.status = :status', { id: productId, status: PRODUCT_STATUS.ACTIVE })
       .innerJoin(ProductEntity, 'product', 'product.id = pp.productId')
       .innerJoin(PropertyEntity, 'property', 'property.id = pp.propertyId')
       .innerJoin(

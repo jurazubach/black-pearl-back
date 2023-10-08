@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { OrderService } from './order.service';
 import { IPagination, Pagination } from 'src/decorators/pagination.decorators';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 
 @ApiTags('Admin Orders')
 @Controller('')

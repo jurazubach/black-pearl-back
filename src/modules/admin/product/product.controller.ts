@@ -2,7 +2,7 @@ import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { IPagination, Pagination } from 'src/decorators/pagination.decorators';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 
 @ApiTags('Admin Products')
 @Controller()

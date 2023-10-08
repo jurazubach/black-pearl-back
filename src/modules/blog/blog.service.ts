@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPagination } from 'src/decorators/pagination.decorators';
-import { ArticleEntity } from 'src/entity/article.entity';
+import { ARTICLE_STATUS, ArticleEntity } from 'src/entity/article.entity';
 
 @Injectable()
 export class BlogService {
@@ -21,11 +21,10 @@ export class BlogService {
         a.alias,
         a.title,
         a.imageSrc,
-        a.lang,
         a.createdAt
         `,
       )
-      .where(`a.isActive = 1`)
+      .where(`a.status = :status`, { status: ARTICLE_STATUS.ACTIVE })
       .orderBy('a.createdAt', 'DESC')
       .limit(pagination.limit)
       .offset(pagination.offset)
@@ -46,7 +45,7 @@ export class BlogService {
         a.createdAt
         `,
       )
-      .where(`a.alias = :alias AND a.isActive = 1`, { alias })
+      .where(`a.alias = :alias AND a.status = :status`, { alias, status: ARTICLE_STATUS.ACTIVE })
       .getRawOne<ArticleEntity>();
 
     if (!article) {

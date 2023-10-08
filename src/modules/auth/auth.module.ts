@@ -5,7 +5,7 @@ import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { AuthService } from './auth.service';
 import { getJwtConfig } from 'src/configs/jwt.config';
-import { UrlModule } from '../../url/url.module';
+import { UrlModule } from '../url/url.module';
 
 @Module({
   controllers: [AuthController],

@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { WarehouseController } from './warehouse.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WarehouseService } from './warehouse.service';
@@ -8,10 +8,8 @@ import { PropertyValueEntity } from 'src/entity/propertyValue.entity';
 import { PropertyEntity } from 'src/entity/property.entity';
 import { SimilarProductEntity } from 'src/entity/similarProduct.entity';
 import { CategoryEntity } from 'src/entity/category.entity';
-import { CollectionEntity } from 'src/entity/collection.entity';
-import { CollectionProductEntity } from 'src/entity/collectionProduct.entity';
 import { ProductPropertyEntity } from 'src/entity/productProperty.entity';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../../auth/auth.module';
 
 @Module({
   imports: [
@@ -20,8 +18,6 @@ import { AuthModule } from '../auth/auth.module';
       SimilarProductEntity,
       ProductEntity,
       CategoryEntity,
-      CollectionEntity,
-      CollectionProductEntity,
       ProductPropertyEntity,
       PropertyValueEntity,
       PropertyEntity,

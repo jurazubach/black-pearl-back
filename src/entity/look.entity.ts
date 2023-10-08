@@ -1,4 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { ARTICLE_STATUS } from './article.entity';
+
+export enum LOOK_STATUS {
+  ACTIVE = 'active',
+  INACTIVE = 'in-active',
+}
 
 @Entity({ name: 'looks' })
 export class LookEntity {
@@ -16,4 +22,7 @@ export class LookEntity {
 
   @Column({ type: 'text', nullable: false })
   description: string;
+
+  @Column({ nullable: false, type: 'enum', enum: LOOK_STATUS, default: LOOK_STATUS.INACTIVE })
+  status: LOOK_STATUS;
 }

@@ -1,6 +1,11 @@
 import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, ManyToOne } from 'typeorm';
 import { CategoryEntity } from './category.entity';
 
+export enum PRODUCT_STATUS {
+  ACTIVE = 'active',
+  INACTIVE = 'in-active',
+}
+
 @Entity({ name: 'products' })
 export class ProductEntity {
   @PrimaryGeneratedColumn()
@@ -24,8 +29,8 @@ export class ProductEntity {
   @Column({ type: 'varchar', unique: true, nullable: false })
   alias: string;
 
-  @Column({ type: 'boolean', default: false })
-  isActive: boolean;
+  @Column({ nullable: false, type: 'enum', enum: PRODUCT_STATUS, default: PRODUCT_STATUS.INACTIVE })
+  status: PRODUCT_STATUS;
 
   @Column({ type: 'varchar', nullable: false })
   title: string;

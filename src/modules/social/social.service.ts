@@ -18,11 +18,12 @@ export class SocialService {
         `
         s.id,
         s.imageSrc,
-        s.description
+        s.description,
+        s.link
         `,
       )
       .where(`s.type = :type`, { type: SOCIAL_TYPE.INSTAGRAM })
-      .orderBy('s.order', 'DESC')
+      .orderBy('s.order', 'ASC')
       .limit(10)
       .getRawMany<SocialEntity>();
   }

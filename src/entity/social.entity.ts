@@ -13,6 +13,9 @@ export class SocialEntity {
   imageSrc: string;
 
   @Column({ type: 'varchar', nullable: false })
+  link: string;
+
+  @Column({ type: 'varchar', nullable: false })
   description: string;
 
   @Column({ nullable: false, type: 'enum', enum: SOCIAL_TYPE })

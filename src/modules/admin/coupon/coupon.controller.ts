@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { CouponService } from './coupon.service';
 import { IPagination, Pagination } from 'src/decorators/pagination.decorators';
 import { CouponDto } from './coupon.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 
 @ApiTags('Admin Coupons')
 @Controller('')

@@ -28,12 +28,6 @@ export class UserEntity {
   @Column({ nullable: false, type: 'enum', enum: USER_ROLE, default: USER_ROLE.USER })
   role: USER_ROLE;
 
-  @Column({ type: 'boolean', nullable: false, default: false })
-  isVerify: boolean;
-
-  @Column({ type: 'boolean', nullable: false, default: false })
-  isActive: boolean;
-
   @Column({ type: 'datetime', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   createdAt: string;
 }

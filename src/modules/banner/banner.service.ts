@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BannerEntity } from 'src/entity/banner.entity';
+import { BANNER_STATUS, BannerEntity } from 'src/entity/banner.entity';
 
 @Injectable()
 export class BannerService {
@@ -26,7 +26,7 @@ export class BannerService {
         b.endAt
         `,
       )
-      .where(`b.isActive = 1 AND b.endAt > NOW()`)
+      .where(`b.status = :status AND b.startAt < NOW() AND b.endAt > NOW()`, { status: BANNER_STATUS.ACTIVE })
       .orderBy('b.order', 'ASC')
       .getRawMany<BannerEntity>();
   }

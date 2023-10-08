@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from 'src/entity/category.entity';
-import { ProductEntity } from 'src/entity/product.entity';
+import { PRODUCT_STATUS, ProductEntity } from 'src/entity/product.entity';
 import { ProductPropertyEntity } from 'src/entity/productProperty.entity';
 import { PropertyEntity } from 'src/entity/property.entity';
 import { PropertyValueEntity } from 'src/entity/propertyValue.entity';
@@ -63,8 +63,9 @@ export class ProductService {
         p.title
         `,
       )
-      .where('p.isActive = 1 AND wp.quantity > 0')
+      .where(`p.status = :status AND wp.quantity > 0`, { status: PRODUCT_STATUS.ACTIVE })
       .limit(6)
+      .groupBy('p.id')
       .innerJoin(WarehouseProductEntity, 'wp', 'wp.productId = p.id');
 
     // TODO: придумать как сортировать
@@ -115,7 +116,7 @@ export class ProductService {
         p.alias,
         p.title
       `)
-      .where('p.isActive = 1 AND lp.lookId = :lookId', { lookId })
+      .where('p.status = :status AND lp.lookId = :lookId', { lookId, status: PRODUCT_STATUS.ACTIVE })
       .innerJoin(LookProductEntity, 'lp', 'lp.productId = p.id')
       .groupBy('p.id')
       .getRawMany<ProductEntity>();
@@ -126,7 +127,7 @@ export class ProductService {
       .createQueryBuilder('p')
       .select(`p.id, p.alias, p.title`)
       .innerJoin(SimilarProductEntity, 'sp', 'sp.similarProductId = p.id')
-      .where('sp.productId = :productId AND p.isActive = 1', { productId })
+      .where('sp.productId = :productId AND p.status = :status', { productId, status: PRODUCT_STATUS.ACTIVE })
       .groupBy('p.id')
       .getRawMany<ProductEntity>();
 
@@ -165,7 +166,7 @@ export class ProductService {
         ) as category
         `,
       )
-      .where(`p.alias = :alias AND p.isActive = 1`, { alias })
+      .where(`p.alias = :alias AND p.status = :status`, { alias, status: PRODUCT_STATUS.ACTIVE })
       .innerJoin(CategoryEntity, 'c', 'c.id = p.categoryId')
       .getRawOne<ProductEntity>();
 
@@ -198,7 +199,7 @@ export class ProductService {
         JSON_OBJECT('id', property.id, 'alias', property.alias, 'title', property.title) as property,
         JSON_OBJECT('id', propertyValue.id, 'alias', propertyValue.alias, 'title', propertyValue.title) as value
       `)
-      .where('product.id = :id AND product.isActive = 1', { id: productId })
+      .where('product.id = :id AND product.status = :status', { id: productId, status: PRODUCT_STATUS.ACTIVE })
       .innerJoin(ProductEntity, 'product', 'product.id = pp.productId')
       .innerJoin(PropertyEntity, 'property', 'property.id = pp.propertyId')
       .innerJoin(

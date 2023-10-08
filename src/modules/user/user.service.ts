@@ -19,12 +19,10 @@ export class UserService {
     const user = await this.userRepository
       .createQueryBuilder()
       .where(where)
-      .select(['id', 'email', 'firstName', 'lastName', 'role', 'lang', 'isActive', 'isVerify'])
+      .select(['id', 'email', 'firstName', 'lastName', 'role'])
       .getRawOne<UserEntity>();
 
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    if (!user.isVerify) throw new HttpException('User not verified', HttpStatus.UNAUTHORIZED);
-    if (!user.isActive) throw new HttpException('User is deactivated', HttpStatus.FORBIDDEN);
 
     return user;
   }

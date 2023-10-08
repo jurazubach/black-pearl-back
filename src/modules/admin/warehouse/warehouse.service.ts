@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProductEntity } from 'src/entity/product.entity';
+import { PRODUCT_STATUS, ProductEntity } from 'src/entity/product.entity';
 import { TWarehouseProductSize, WarehouseProductEntity } from 'src/entity/warehouseProduct.entity';
 import _round from 'lodash/round';
 import { SimilarProductEntity } from 'src/entity/similarProduct.entity';
@@ -68,7 +68,7 @@ export class WarehouseService {
       .createQueryBuilder('p')
       .select(`p.id, p.alias, p.title, p.description`)
       .innerJoin(SimilarProductEntity, 'sp', 'sp.similarProductId = p.id')
-      .where('sp.productId = :productId AND p.isActive = 1', { productId })
+      .where('sp.productId = :productId AND p.status = :status', { productId, status: PRODUCT_STATUS.ACTIVE })
       .groupBy('p.id')
       .getRawMany<ProductEntity>();
 

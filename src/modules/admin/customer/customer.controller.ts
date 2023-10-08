@@ -4,7 +4,7 @@ import { CustomerService } from './customer.service';
 import { IPagination, Pagination } from 'src/decorators/pagination.decorators';
 import { CustomerDTO } from './customer.dto';
 import { CustomerEntity } from 'src/entity/customer.entity';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 
 @ApiTags('Admin Customers')
 @Controller('')

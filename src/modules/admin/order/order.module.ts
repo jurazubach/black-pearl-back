@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 import { CustomerEntity } from 'src/entity/customer.entity';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../../auth/auth.module';
 import { OrderEntity } from 'src/entity/order.entity';
 import { OrderProductEntity } from 'src/entity/orderProduct.entity';
 import { ProductModule } from '../product/product.module';

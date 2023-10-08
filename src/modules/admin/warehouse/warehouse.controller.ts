@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { WarehouseService } from './warehouse.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 import { IPagination, Pagination } from 'src/decorators/pagination.decorators';
 
 @ApiTags('Admin Warehouse')

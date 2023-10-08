@@ -20,6 +20,9 @@ import { SubscriptionModule } from 'src/modules/subscription/subscription.module
 import { FeedbackModule } from 'src/modules/feedback/feedback.module';
 import { SocialModule } from 'src/modules/social/social.module';
 import { BannerModule } from 'src/modules/banner/banner.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
   imports: [
@@ -33,6 +36,9 @@ import { BannerModule } from 'src/modules/banner/banner.module';
       useFactory: getStaticConfig,
       inject: [ConfigService],
     }),
+    AuthModule,
+    UserModule,
+    CategoryModule,
     CacheModule.register({ isGlobal: true }),
     AdminModule,
     ProductModule,

@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPagination } from 'src/decorators/pagination.decorators';
-import { PromotionEntity } from 'src/entity/promotion.entity';
+import { PROMOTION_STATUS, PromotionEntity } from 'src/entity/promotion.entity';
 import { ProductEntity } from 'src/entity/product.entity';
 import { PromotionProductEntity } from 'src/entity/promotionProduct.entity';
 
@@ -29,7 +29,7 @@ export class PromotionService {
         p.endAt
         `,
       )
-      .where(`p.isActive = 1 AND p.endAt > NOW()`)
+      .where(`p.status = :status AND p.endAt > NOW()`, { status: PROMOTION_STATUS.ACTIVE })
       .limit(6)
       .getRawMany<PromotionEntity>();
 
@@ -49,7 +49,7 @@ export class PromotionService {
         p.endAt
         `,
       )
-      .where(`p.isActive = 1 AND p.endAt > NOW()`)
+      .where(`p.status = :status AND p.endAt > NOW()`, { status: PROMOTION_STATUS.ACTIVE })
       .limit(pagination.limit)
       .offset(pagination.offset)
       .getRawMany<PromotionEntity>();
@@ -65,7 +65,7 @@ export class PromotionService {
         p.alias,
         p.title
       `)
-      .where('p.isActive = 1')
+      .where('p.status = :status', { status: PROMOTION_STATUS.ACTIVE })
       .innerJoin(PromotionProductEntity, 'pp', 'pp.promotionId = :promotionId', { promotionId })
       .groupBy('p.id')
       .getRawMany<ProductEntity>();
@@ -84,7 +84,7 @@ export class PromotionService {
         p.endAt
         `,
       )
-      .where(`p.alias = :alias AND p.isActive = 1`, { alias })
+      .where(`p.alias = :alias AND p.status = :status`, { alias, status: PROMOTION_STATUS.ACTIVE })
       .getRawOne<PromotionEntity>();
 
     if (!promotion) {

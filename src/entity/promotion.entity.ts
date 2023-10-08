@@ -1,5 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
+export enum PROMOTION_STATUS {
+  ACTIVE = 'active',
+  INACTIVE = 'in-active',
+}
+
 @Entity({ name: 'promotions' })
 export class PromotionEntity {
   @PrimaryGeneratedColumn()
@@ -17,8 +22,8 @@ export class PromotionEntity {
   @Column({ type: 'text', nullable: false })
   description: string;
 
-  @Column({ type: 'boolean', default: false })
-  isActive: boolean;
+  @Column({ nullable: false, type: 'enum', enum: PROMOTION_STATUS, default: PROMOTION_STATUS.INACTIVE })
+  status: PROMOTION_STATUS;
 
   @Column({ type: 'datetime', nullable: false })
   startAt: string;

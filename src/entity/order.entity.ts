@@ -3,16 +3,16 @@ import { CouponEntity } from './coupon.entity';
 
 export enum EOrderType {
   OPEN = 'open',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  CANCELED = 'canceled',
-  DELIVERING = 'delivering',
-  PAUSE = 'pause',
+  PROCESSING = 'processing', // вишивается, делается или еще несем на почту
+  DELIVERING = 'delivering', // доставляется в пути
+  DELIVERED = 'delivered', // на почте лежит
+  COMPLETED = 'completed', // виполнен забрали
+  CANCELED = 'canceled', // отменен
 }
 
 export enum EOrderPostType {
-  NOVA_POSHTA = 'novaPoshta',
-  UKR_POSHTA = 'ukrPoshta',
+  NOVA_POSHTA = 'nova-poshta',
+  UKR_POSHTA = 'ukr-poshta',
 }
 
 export enum EOrderPaymentType {
@@ -23,7 +23,7 @@ export enum EOrderPaymentType {
 export enum EOrderPayment {
   PAID = 'paid',
   WAITING = 'waiting', // оплатили но не дошли
-  UN_PAID = 'unPaid',
+  UN_PAID = 'un-paid',
 }
 
 @Entity({ name: 'orders' })

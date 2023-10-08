@@ -13,8 +13,6 @@ export const users = [
     password:
       '303c41df4ef1c02f551d909d80790c2848f703589d02a8c89e515b032d5f996fa52e0723f20e55d4062119b7c1b627198eb5b789fde849fa3da6a2b39dac21a6',
     role: USER_ROLE.ADMIN,
-    isVerify: 1,
-    isActive: 1,
   },
   {
     id: 2,
@@ -26,8 +24,6 @@ export const users = [
     password:
       '303c41df4ef1c02f551d909d80790c2848f703589d02a8c89e515b032d5f996fa52e0723f20e55d4062119b7c1b627198eb5b789fde849fa3da6a2b39dac21a6',
     role: USER_ROLE.USER,
-    isVerify: 1,
-    isActive: 1,
   },
 ];
 
@@ -76,7 +72,7 @@ export const categories = [
     singleTitle: 'Джемпер',
     multipleTitle: 'Джемпери',
     description: 'Джемпер описание',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 1074,
@@ -84,7 +80,7 @@ export const categories = [
     singleTitle: 'Светр',
     multipleTitle: 'Светри',
     description: 'Светр описание',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 1165,
@@ -92,7 +88,7 @@ export const categories = [
     singleTitle: 'Толстовка з капюшоном',
     multipleTitle: 'Толстовки з капюшоном',
     description: 'Толстовка з капюшоном описание',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 1187,
@@ -100,7 +96,7 @@ export const categories = [
     singleTitle: 'Футболка',
     multipleTitle: 'Футболки',
     description: 'Футболка описание',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 1231,
@@ -108,7 +104,7 @@ export const categories = [
     singleTitle: 'Шорти',
     multipleTitle: 'Шорти',
     description: 'Шорти описание',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 1246,
@@ -116,7 +112,7 @@ export const categories = [
     singleTitle: 'Штани',
     multipleTitle: 'Штани',
     description: 'Штани описание',
-    isActive: 1,
+    status: 'active'
   },
 ];
 
@@ -128,7 +124,7 @@ export const products = [
     alias: 'sportyvnyj_kostyum_z_trynytky_molochnyi_zhinochyj',
     title: 'Спортивний костюм The Black Pearl з тринитки молочний жіночий',
     description: 'Гарний та стильний костюм який зігріє тебе в прохолодну погоду. Зручний крій робить дану модель ідеальною для повсякденних справ та активного відпочинку. Костюм виготовлено з якісної тканини яка не кашлатиться та не втрачає колір навіть після багаторазового прання. Поповни свій гардероб яскравою новинкою.',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 2,
@@ -137,7 +133,7 @@ export const products = [
     alias: 'sportyvnyj_kostyum_z_trynytky_malahit_zhinochyj',
     title: 'Спортивний костюм The Black Pearl з тринитки малахіт жіночий',
     description: 'Гарний та стильний костюм який зігріє тебе в прохолодну погоду. Зручний крій робить дану модель ідеальною для повсякденних справ та активного відпочинку. Костюм виготовлено з якісної тканини яка не кашлатиться та не втрачає колір навіть після багаторазового прання. Поповни свій гардероб яскравою новинкою.',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 3,
@@ -146,7 +142,7 @@ export const products = [
     alias: 'sportyvnyj_kostyum_z_trynytky_kobalt_zhinochyj',
     title: 'Спортивний костюм The Black Pearl з тринитки кобальт жіночий',
     description: 'Гарний та стильний костюм який зігріє тебе в прохолодну погоду. Зручний крій робить дану модель ідеальною для повсякденних справ та активного відпочинку. Костюм виготовлено з якісної тканини яка не кашлатиться та не втрачає колір навіть після багаторазового прання. Поповни свій гардероб яскравою новинкою.',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 4,
@@ -155,7 +151,7 @@ export const products = [
     alias: 'sportyvnyj_kostyum_z_trynytky_akvamaryn_zhinochyj',
     title: 'Спортивний костюм The Black Pearl з тринитки аквамарин жіночий',
     description: 'Гарний та стильний костюм який зігріє тебе в прохолодну погоду. Зручний крій робить дану модель ідеальною для повсякденних справ та активного відпочинку. Костюм виготовлено з якісної тканини яка не кашлатиться та не втрачає колір навіть після багаторазового прання. Поповни свій гардероб яскравою новинкою.',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 5,
@@ -164,7 +160,7 @@ export const products = [
     alias: 'sportyvnyj_kostyum_teplyj_na_flisi_fuksiya_zhinochyj',
     title: 'Спортивний костюм The Black Pearl теплий на флісі фуксія жіночий',
     description: 'Теплий, комфортний та стильний костюм на флісі! Базова річ на прохолоді пори року. Якісний, з натуральної тканини та зовсім не парить і не кошлатиться, після прання не втрачає колір. Підходить для повсякденного носіння та активного відпочинку.',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 6,
@@ -173,7 +169,7 @@ export const products = [
     alias: 'sportyvnyj_kostyum_teplyj_na_flisi_akvamaryn_zhinochyj',
     title: 'Спортивний костюм The Black Pearl теплий на флісі аквамарин жіночий',
     description: 'Теплий, комфортний та стильний костюм на флісі! Базова річ на прохолоді пори року. Якісний, з натуральної тканини та зовсім не парить і не кошлатиться, після прання не втрачає колір. Підходить для повсякденного носіння та активного відпочинку.',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 7,
@@ -182,7 +178,7 @@ export const products = [
     alias: 'futbolka-bazova-akvamaryn',
     title: 'Футболка базова аквамарин',
     description: 'Аквамарин однотонна базова футболка - річ, яка легко впишеться в будь-який гардероб. Коли потрібно щоб було комфортно та стильно - обирай базову футболку та доповнюй стильними джинсами, шортами або спідницею.',
-    isActive: 1,
+    status: 'active'
   },
   {
     id: 8,
@@ -191,7 +187,7 @@ export const products = [
     alias: 'futbolka-bazova-bezheva',
     title: 'Футболка базова бежева',
     description: 'Жовта однотонна базова футболка - річ, яка легко впишеться в будь-який гардероб. Коли потрібно щоб було комфортно та стильно - обирай базову футболку та доповнюй стильними джинсами, шортами або спідницею.',
-    isActive: 1,
+    status: 'active'
   }
 ];
 
@@ -400,19 +396,4 @@ export const warehouseProducts = [
   { productId: products[7].id, quantity: 5, costPrice: 650, price: 800, oldPrice: 1200, size: WAREHOUSE_PRODUCT_SIZE.XS },
   { productId: products[7].id, quantity: 5, costPrice: 650, price: 800, oldPrice: 1200, size: WAREHOUSE_PRODUCT_SIZE.S },
   { productId: products[7].id, quantity: 5, costPrice: 650, price: 800, oldPrice: 1200, size: WAREHOUSE_PRODUCT_SIZE.M },
-];
-
-export const collections = [
-  { id: 1, imageSrc: 'example.png', alias: 'nezaleshna', title: 'Незалежна', description: 'Описание незалежна', isActive: 1 },
-  { id: 2, imageSrc: 'example.png', alias: 'tony-soprano', title: 'Тони сопрано', description: 'Описание сопрано', isActive: 1 },
-  { id: 3, imageSrc: 'example.png', alias: 'summer', title: 'Прекрасное лето', description: 'Описание лето', isActive: 1 },
-];
-
-export const collectionProducts = [
-  { collectionId: collections[0].id, productId: products[0].id },
-  { collectionId: collections[0].id, productId: products[1].id },
-  { collectionId: collections[0].id, productId: products[2].id },
-  { collectionId: collections[0].id, productId: products[3].id },
-  { collectionId: collections[1].id, productId: products[4].id },
-  { collectionId: collections[1].id, productId: products[5].id },
 ];
