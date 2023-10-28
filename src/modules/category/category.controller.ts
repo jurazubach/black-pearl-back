@@ -11,6 +11,15 @@ export class CategoryController {
     private readonly seoService: SeoService,
   ) {}
 
+  @Get('menu')
+  @ApiOperation({ summary: 'Возвращает список доступных категорий' })
+  @HttpCode(HttpStatus.OK)
+  async getMenu() {
+    const categoryMenu = await this.categoryService.getMenu();
+
+    return { data: categoryMenu };
+  }
+
   @Get(':alias')
   @ApiParam({
     name: 'alias',

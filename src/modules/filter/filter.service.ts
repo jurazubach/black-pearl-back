@@ -22,6 +22,27 @@ export class FilterService {
   ) {
   }
 
+  public async getCategoryFilters(alias: string): Promise<IFilterModels> {
+    const filterModels: IFilterModels = {
+      categories: [],
+      sizes: [],
+      properties: [],
+    };
+
+    for await (let filterKey of Object.values(LISTEN_FILTERS)) {
+      if (filterKey === LISTEN_FILTERS.SIZE) {
+        filterModels.sizes = await this.getSizesModels();
+      } else {
+        const filterPropertyModel = await this.getPropertyModels(filterKey);
+        if (filterPropertyModel) {
+          filterModels.properties.push(filterPropertyModel)
+        }
+      }
+    }
+
+    return filterModels;
+  }
+
   public async getList(): Promise<IFilterModels> {
     const filterModels: IFilterModels = {
       categories: [],
