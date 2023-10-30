@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, ManyToOne, Index } from 'typeorm';
 import { CategoryEntity } from './category.entity';
 
 export enum PRODUCT_STATUS {
@@ -7,6 +7,8 @@ export enum PRODUCT_STATUS {
 }
 
 @Entity({ name: 'products' })
+@Index("product_code_fulltext_index", { synchronize: false })
+@Index("product_title_fulltext_index", { synchronize: false })
 export class ProductEntity {
   @PrimaryGeneratedColumn()
   id: number;

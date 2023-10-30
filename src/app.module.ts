@@ -23,6 +23,7 @@ import { BannerModule } from 'src/modules/banner/banner.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { CategoryModule } from './modules/category/category.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { CategoryModule } from './modules/category/category.module';
     AuthModule,
     UserModule,
     CategoryModule,
+    SearchModule,
     CacheModule.register({ isGlobal: true }),
     AdminModule,
     ProductModule,

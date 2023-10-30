@@ -10,6 +10,9 @@ import {
   products,
   orderProducts,
   orders,
+  banners,
+  socials,
+  articles,
   coupons,
   similarProducts,
   warehouseProducts,
@@ -25,6 +28,9 @@ import { CouponEntity } from '../entity/coupon.entity';
 import { SimilarProductEntity } from '../entity/similarProduct.entity';
 import { OrderEntity } from '../entity/order.entity';
 import { WarehouseProductEntity } from '../entity/warehouseProduct.entity';
+import { BannerEntity } from '../entity/banner.entity';
+import { SocialEntity } from '../entity/social.entity';
+import { ArticleEntity } from '../entity/article.entity';
 
 const insertToTable = async (connection: DataSource, entity: any, data: any) => {
   try {
@@ -50,6 +56,13 @@ const runBootstrap = async () => {
 
   await insertToTable(connection, OrderEntity, orders);
   await insertToTable(connection, OrderProductEntity, orderProducts);
+
+  await insertToTable(connection, BannerEntity, banners);
+  await insertToTable(connection, SocialEntity, socials);
+  await insertToTable(connection, ArticleEntity, articles);
+
+  await connection.query(`ALTER TABLE products ADD FULLTEXT (code)`);
+  await connection.query(`ALTER TABLE products ADD FULLTEXT (title)`);
 };
 
 runBootstrap()

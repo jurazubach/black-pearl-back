@@ -1,5 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
+export enum SOCIAL_STATUS {
+  ACTIVE = 'active',
+  INACTIVE = 'in-active',
+}
+
 export enum SOCIAL_TYPE {
   INSTAGRAM = 'instagram',
 }
@@ -23,4 +28,7 @@ export class SocialEntity {
 
   @Column({ type: 'int', nullable: false, default: 1 })
   order: number;
+
+  @Column({ nullable: false, type: 'enum', enum: SOCIAL_STATUS, default: SOCIAL_STATUS.INACTIVE })
+  status: SOCIAL_STATUS;
 }

@@ -1,6 +1,10 @@
+import dayjs from 'dayjs';
 import { USER_ROLE } from '../../entity/user.entity';
 import { WAREHOUSE_PRODUCT_SIZE } from '../../entity/warehouseProduct.entity';
 import { EOrderPayment, EOrderPaymentType, EOrderType } from '../../entity/order.entity';
+import { BANNER_STATUS } from '../../entity/banner.entity';
+import { SOCIAL_STATUS, SOCIAL_TYPE } from '../../entity/social.entity';
+import { ARTICLE_STATUS } from '../../entity/article.entity';
 
 export const users = [
   {
@@ -49,8 +53,8 @@ export const propertyValues = [
   { id: 9, propertyId: properties[3].id, alias: 'half-season', title: 'Демисезон' },
   // material
   { id: 10, propertyId: properties[1].id, alias: 'fleece', title: 'Фліс' },
-  { id: 11, propertyId: properties[1].id, alias: 'three_threads', title: '3 нитка' },
-  { id: 12, propertyId: properties[1].id, alias: 'two_threads', title: '2 нитка' },
+  { id: 11, propertyId: properties[1].id, alias: 'three-threads', title: '3 нитка' },
+  { id: 12, propertyId: properties[1].id, alias: 'two-threads', title: '2 нитка' },
   // composition
   { id: 13, propertyId: properties[0].id, alias: 'cotton', title: 'Бавовна 100%' },
   // color
@@ -92,7 +96,7 @@ export const categories = [
   },
   {
     id: 1187,
-    alias: 't-shorts',
+    alias: 't-shirts',
     singleTitle: 'Футболка',
     multipleTitle: 'Футболки',
     description: 'Футболка описание',
@@ -396,4 +400,89 @@ export const warehouseProducts = [
   { productId: products[7].id, quantity: 5, costPrice: 650, price: 800, oldPrice: 1200, size: WAREHOUSE_PRODUCT_SIZE.XS },
   { productId: products[7].id, quantity: 5, costPrice: 650, price: 800, oldPrice: 1200, size: WAREHOUSE_PRODUCT_SIZE.S },
   { productId: products[7].id, quantity: 5, costPrice: 650, price: 800, oldPrice: 1200, size: WAREHOUSE_PRODUCT_SIZE.M },
+];
+
+export const banners = [
+  {
+    imageSrc: 'https://lichi.com/_next/static/media/autumn23A0.1d44bbac.jpg',
+    alias: 'halloween',
+    title: 'Хэллоуин',
+    description: 'Современный международный праздник, восходящий к традициям древних кельтов Ирландии и Шотландии, история которого началась на территории современных Великобритании и Северной Ирландии.',
+    order: 1,
+    link: '/catalog/hoodies',
+    status: BANNER_STATUS.ACTIVE,
+    startAt: dayjs().subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
+    endAt: dayjs().add(1, 'y').format('YYYY-MM-DD HH:mm:ss'),
+  },
+  {
+    imageSrc: 'https://lichi.com/_next/static/media/italyE1.e321baee.jpg',
+    alias: 'new-year',
+    title: 'Новий рік',
+    description: 'главный календарный праздник, наступающий в момент перехода с последнего дня текущего года в первый день следующего года. Отмечается многими народами в соответствии с принятым календарём',
+    order: 2,
+    link: '/catalog/t-shirt',
+    status: BANNER_STATUS.ACTIVE,
+    startAt: dayjs().subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
+    endAt: dayjs().add(1, 'y').format('YYYY-MM-DD HH:mm:ss'),
+  },
+];
+
+export const socials = [
+  {
+    imageSrc: 'https://emea.blvck.com/cdn/shop/files/contact.jpg?v=1632664719',
+    link: 'https://www.instagram.com/p/CTFB42wNKra/?img_index=1',
+    description: 'отряд самоубийц 😅',
+    type: SOCIAL_TYPE.INSTAGRAM,
+    order: 1,
+    status: SOCIAL_STATUS.ACTIVE,
+  },
+  {
+    imageSrc: 'https://emea.blvck.com/cdn/shop/files/contact.jpg?v=1632664719',
+    link: 'https://www.instagram.com/p/CTFB42wNKra/?img_index=1',
+    description: 'отряд самоубийц 😅',
+    type: SOCIAL_TYPE.INSTAGRAM,
+    order: 2,
+    status: SOCIAL_STATUS.ACTIVE,
+  },
+  {
+    imageSrc: 'https://emea.blvck.com/cdn/shop/files/contact.jpg?v=1632664719',
+    link: 'https://www.instagram.com/p/CTFB42wNKra/?img_index=1',
+    description: 'отряд самоубийц 😅',
+    type: SOCIAL_TYPE.INSTAGRAM,
+    order: 3,
+    status: SOCIAL_STATUS.ACTIVE,
+  },
+  {
+    imageSrc: 'https://emea.blvck.com/cdn/shop/files/contact.jpg?v=1632664719',
+    link: 'https://www.instagram.com/p/CTFB42wNKra/?img_index=1',
+    description: 'отряд самоубийц 😅',
+    type: SOCIAL_TYPE.INSTAGRAM,
+    order: 4,
+    status: SOCIAL_STATUS.ACTIVE,
+  },
+  {
+    imageSrc: 'https://emea.blvck.com/cdn/shop/files/contact.jpg?v=1632664719',
+    link: 'https://www.instagram.com/p/CTFB42wNKra/?img_index=1',
+    description: 'отряд самоубийц 😅',
+    type: SOCIAL_TYPE.INSTAGRAM,
+    order: 5,
+    status: SOCIAL_STATUS.ACTIVE,
+  }
+];
+
+export const articles = [
+  {
+    imageSrc: 'https://wwd.com/wp-content/uploads/2023/01/3-2.jpg',
+    alias: 'halloween',
+    title: 'Хэллоуин',
+    text: 'Современный международный праздник, восходящий к традициям древних кельтов Ирландии и Шотландии, история которого началась на территории современных Великобритании и Северной Ирландии.',
+    status: ARTICLE_STATUS.ACTIVE,
+  },
+  {
+    imageSrc: 'https://wwd.com/wp-content/uploads/2023/01/3-2.jpg',
+    alias: 'new-year',
+    title: 'Новий рік',
+    text: 'главный календарный праздник, наступающий в момент перехода с последнего дня текущего года в первый день следующего года. Отмечается многими народами в соответствии с принятым календарём',
+    status: ARTICLE_STATUS.ACTIVE,
+  }
 ];
